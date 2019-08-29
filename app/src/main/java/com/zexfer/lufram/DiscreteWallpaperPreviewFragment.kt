@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageButton
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -21,8 +22,7 @@ import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_SUBTYPE
 import com.zexfer.lufram.Lufram.Companion.WALLPAPER_DISCRETE
 import com.zexfer.lufram.database.models.DiscreteWallpaper
 
-class DiscreteWallpaperPreviewFragment :
-    WallpaperPreviewFragment<DiscreteWallpaper>() {
+class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpaper>() {
 
     init {
         adapterId = Lufram.ADAPTER_DISCRETE
@@ -57,8 +57,8 @@ class DiscreteWallpaperPreviewFragment :
         }
     }
 
-    class ViewHolder(rootCardView: View) : RecyclerView.ViewHolder(rootCardView), OnSharedPreferenceChangeListener,
-        View.OnClickListener, PopupMenu.OnMenuItemClickListener {
+    class ViewHolder(private val rootCardView: View) : RecyclerView.ViewHolder(rootCardView),
+        OnSharedPreferenceChangeListener, View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
         private val nameView: TextView = rootCardView.findViewById(R.id.text_name)
         private val btnMenu: AppCompatImageButton = rootCardView.findViewById(R.id.btn_menu)
@@ -77,10 +77,12 @@ class DiscreteWallpaperPreviewFragment :
             }
         }
 
+        private var boundWallpaper: DiscreteWallpaper? = null
         private var boundWallpaperId: Int = -1
 
         fun bindTo(wallpaper: DiscreteWallpaper) {
             nameView.text = wallpaper.name
+            boundWallpaper = wallpaper
             boundWallpaperId = wallpaper.id ?: -1
 
             Ion.with(imagePreview)
@@ -97,7 +99,7 @@ class DiscreteWallpaperPreviewFragment :
 
             when (view.id) {
                 R.id.btn_apply -> {
-                    if (boundWallpaperId != -1) {
+                    if (boundWallpaper?.id !== null) {
                         if (btnApply.text.equals("Apply")) {
                             LuframRepository.applyDiscreteWallpaper(boundWallpaperId)
                         } else {
@@ -114,6 +116,13 @@ class DiscreteWallpaperPreviewFragment :
             when (item?.order) {
                 1 -> { // Delete
                     LuframRepository.deleteDiscreteWallpaper(boundWallpaperId)
+                }
+                2 -> { // Edit
+                    Navigation.findNavController(rootCardView)
+                        .navigate(R.id.action_discreteWallpaperPreviewFragment2_to_discreteWallpaperEditorFragment2,
+                            Bundle().apply {
+                                putParcelable("source", boundWallpaper)
+                            })
                 }
             }
 
@@ -145,5 +154,8 @@ class DiscreteWallpaperPreviewFragment :
                 return oldItem.equals(newItem)
             }
         }
+
+        @JvmStatic
+        val EDIT_DISCRETE_WALLPAPER = 102
     }
 }

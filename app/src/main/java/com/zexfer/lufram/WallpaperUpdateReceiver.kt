@@ -74,8 +74,13 @@ class WallpaperUpdateReceiver : BroadcastReceiver() {
             }
 
             val luframPrefs = (context as Context).getSharedPreferences(LUFRAM_PREFS, 0)
-            val oldOffset = luframPrefs.getInt(PREF_WALLPAPER_STATE, 0)
-            val newOffset = (oldOffset + 1) % result.inputURIs.size
+            val newOffset: Int = run {
+                if (!result.randomizeOrder) {
+                    luframPrefs.getInt(PREF_WALLPAPER_STATE, 0) + 1
+                } else {
+                    (Math.random() * result.inputURIs.size).toInt()
+                }
+            }
 
             (context?.getSystemService(WALLPAPER_SERVICE) as WallpaperManager)
                 .setBitmap(

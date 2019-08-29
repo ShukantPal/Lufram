@@ -6,6 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.Navigation
 import com.google.android.material.snackbar.Snackbar
 import com.zexfer.lufram.database.models.DiscreteWallpaper
 
@@ -15,12 +16,6 @@ class MainActivity : AppCompatActivity(), WallpaperPreviewFragment.WallpaperList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.app_bar))
-
-        if (savedInstanceState === null) {
-            supportFragmentManager.beginTransaction()
-                .add(R.id.frame_content, DiscreteWallpaperPreviewFragment())
-                .commit()
-        }
     }
 
     override fun onStart() {
@@ -51,10 +46,8 @@ class MainActivity : AppCompatActivity(), WallpaperPreviewFragment.WallpaperList
     }
 
     fun onAddWallpaperClick(fab: View?) {
-        startActivityForResult(
-            Intent(this, DiscreteWallpaperCreatorActivity::class.java),
-            CREATE_DISCRETE_WALLPAPER
-        )
+        Navigation.findNavController(this, R.id.nav_host_fragment)
+            .navigate(R.id.action_discreteWallpaperPreviewFragment2_to_discreteWallpaperEditorFragment2)
     }
 
     override fun visibleWallpapers(adapterId: Int): LiveData<Any> {
@@ -65,5 +58,8 @@ class MainActivity : AppCompatActivity(), WallpaperPreviewFragment.WallpaperList
     companion object {
         @JvmStatic
         val CREATE_DISCRETE_WALLPAPER = 1
+
+        @JvmStatic
+        val EDIT_DISCRETE_WALLPAPER = 2
     }
 }

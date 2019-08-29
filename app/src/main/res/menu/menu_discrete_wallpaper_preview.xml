@@ -3,4 +3,7 @@
     <item
             android:title="Delete"
             android:orderInCategory="1"/>
+    <item
+            android:title="Edit"
+            android:orderInCategory="2"/>
 </menu>

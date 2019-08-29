@@ -17,11 +17,13 @@ import android.widget.Switch
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.zexfer.lufram.adapters.ThumbnailListAdapter
 import com.zexfer.lufram.database.models.DiscreteWallpaper
+import com.zexfer.lufram.database.tasks.PutWallpaperTask
 
 /**
  * A simple editor for discrete wallpapers; it can take an input
@@ -43,32 +45,27 @@ class DiscreteWallpaperEditorFragment : Fragment(), View.OnClickListener, Thumbn
     private lateinit var thumbAdapter: ThumbnailListAdapter
     private lateinit var wallpaperUris: MutableList<Uri>
 
-    override fun onAttach(context: Context?) {
+    private var targetWallpaperId: Int? = null
+
+    override fun onAttach(context: Context) {
         super.onAttach(context)
 
         if (context is OnSubmitClickListener) {
             listener = context
-        } else {
-            throw IllegalArgumentException(
-                "Context must implement " +
-                        "DiscreteWallpaperEditorFragment.OnSubmitClickListener"
-            )
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (savedInstanceState === null) {
-            thumbSize = DisplayMetrics().also {
+        thumbSize = DisplayMetrics().also {
                 activity?.windowManager?.defaultDisplay?.getMetrics(it)
-            }.let {
-                Size(it.widthPixels / 3, it.heightPixels / 3)
-            }
-
-            thumbAdapter = ThumbnailListAdapter(context as Context, thumbSize, this)
-            wallpaperUris = mutableListOf()
+        }.let {
+            Size(it.widthPixels / 3, it.heightPixels / 3)
         }
+
+        thumbAdapter = ThumbnailListAdapter(context as Context, thumbSize, this)
+        wallpaperUris = mutableListOf()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -90,12 +87,13 @@ class DiscreteWallpaperEditorFragment : Fragment(), View.OnClickListener, Thumbn
             if (savedInstanceState !== null) {
                 inputName.setText(savedInstanceState.getString("wp_name") ?: "")
                 inputIntervalMinutes.setText(savedInstanceState.getString("wp_interval") ?: "")
-                inputRandomizeOrder.isActivated = (savedInstanceState.getBoolean("wp_randomize"))
+                inputRandomizeOrder.isChecked = (savedInstanceState.getBoolean("wp_randomize"))
                 wallpaperUris = DiscreteWallpaper.castToUriArray(
                     savedInstanceState.getParcelableArray("wp_uris") as Array
                 ).toMutableList()
+
             } else {
-                val wallpaper = arguments?.getParcelable(ARG_WALLPAPER) as DiscreteWallpaper?
+                val wallpaper = arguments?.getParcelable(ARG_SOURCE) as DiscreteWallpaper?
 
                 if (wallpaper === null)
                     return@also
@@ -104,7 +102,10 @@ class DiscreteWallpaperEditorFragment : Fragment(), View.OnClickListener, Thumbn
                 inputIntervalMinutes.setText((wallpaper.interval.toFloat() / 60000).toString())
                 inputRandomizeOrder.isChecked = wallpaper.randomizeOrder
                 wallpaperUris = wallpaper.inputURIs.toMutableList()
+                targetWallpaperId = wallpaper.id
             }
+
+            thumbAdapter.submitList(ArrayList(wallpaperUris))
         }
     }
 
@@ -114,6 +115,7 @@ class DiscreteWallpaperEditorFragment : Fragment(), View.OnClickListener, Thumbn
         outState.putString("wp_interval", inputIntervalMinutes.text.toString())
         outState.putBoolean("wp_randomize", inputRandomizeOrder.isActivated)
         outState.putParcelableArray("wp_uris", wallpaperUris.toTypedArray())
+        outState.putInt("wp_id", targetWallpaperId ?: -1)
     }
 
     override fun onDestroyView() {
@@ -130,14 +132,23 @@ class DiscreteWallpaperEditorFragment : Fragment(), View.OnClickListener, Thumbn
     override fun onClick(target: View?) {
         when (target?.id) {
             R.id.btn_submit -> {
-                ViewModelProviders.of(activity as FragmentActivity)[WallpaperViewModel::class.java]
-                    .targetWallpaper = DiscreteWallpaper(
+                val wallpaper = DiscreteWallpaper(
                     inputName.text.toString(),
                     wallpaperUris.toTypedArray(),
                     (inputIntervalMinutes.text.toString().toDouble() * 60000).toLong(),
-                    inputRandomizeOrder.isActivated
+                    inputRandomizeOrder.isChecked,
+                    targetWallpaperId
                 )
-                listener?.onSubmitClick()
+
+                ViewModelProviders.of(activity as FragmentActivity)[WallpaperViewModel::class.java]
+                    .targetWallpaper = wallpaper
+
+                if (listener !== null)
+                    listener?.onSubmitClick()
+                else {
+                    PutWallpaperTask().execute(wallpaper)
+                    Navigation.findNavController(inputName).navigateUp()
+                }
             }
             R.id.fab_add_wp -> startActivityForResult(
                 Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -201,7 +212,7 @@ class DiscreteWallpaperEditorFragment : Fragment(), View.OnClickListener, Thumbn
 
     companion object {
         @JvmStatic
-        val ARG_WALLPAPER = "WallpaperToEdit"
+        val ARG_SOURCE = "source"
 
         @JvmStatic
         val APPEND_WALLPAPERS = 1

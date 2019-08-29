@@ -30,7 +30,7 @@ open class WallpaperPreviewFragment<WallpaperType> : Fragment() {
 
     protected open var listAdapter: ListAdapter<WallpaperType, *>? = null
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
 
         if (listAdapter === null) {

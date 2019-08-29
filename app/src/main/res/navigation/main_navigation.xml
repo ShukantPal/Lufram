@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools" android:id="@+id/main_navigation"
+            app:startDestination="@id/discreteWallpaperPreviewFragment2">
+    <fragment android:id="@+id/discreteWallpaperPreviewFragment2"
+              android:name="com.zexfer.lufram.DiscreteWallpaperPreviewFragment"
+              android:label="DiscreteWallpaperPreviewFragment">
+        <action android:id="@+id/action_discreteWallpaperPreviewFragment2_to_discreteWallpaperEditorFragment2"
+                app:destination="@id/discreteWallpaperEditorFragment2"/>
+    </fragment>
+    <fragment android:id="@+id/discreteWallpaperEditorFragment2"
+              android:name="com.zexfer.lufram.DiscreteWallpaperEditorFragment"
+              android:label="fragment_discrete_wallpaper_editor"
+              tools:layout="@layout/fragment_discrete_wallpaper_editor">
+        <argument android:name="source" app:argType="com.zexfer.lufram.database.models.DiscreteWallpaper"
+        />
+    </fragment>
+</navigation>

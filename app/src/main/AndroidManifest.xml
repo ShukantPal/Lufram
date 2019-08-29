@@ -16,9 +16,6 @@
                 android:enabled="true"
                 android:exported="true">
         </receiver>
-
-        <activity android:name=".DiscreteWallpaperCreatorActivity">
-        </activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
