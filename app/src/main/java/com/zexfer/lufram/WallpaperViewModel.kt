@@ -18,6 +18,6 @@ class WallpaperViewModel : ViewModel() {
     }
 
     fun putDiscreteWallpaper(wallpaper: DiscreteWallpaper) {
-        LuframDatabase.PutWallpaperTask().execute(wallpaper)
+        LuframRepository.putWallpaper(wallpaper)
     }
 }

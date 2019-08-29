@@ -13,8 +13,11 @@ import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_SUBTYPE
 import com.zexfer.lufram.Lufram.Companion.PREF_WAS_STOPPED
 import com.zexfer.lufram.Lufram.Companion.WALLPAPER_DISCRETE
-import com.zexfer.lufram.database.LuframDatabase
 import com.zexfer.lufram.database.models.DiscreteWallpaper
+import com.zexfer.lufram.database.tasks.DeleteDiscreteWallpaperByIdTask
+import com.zexfer.lufram.database.tasks.DeleteWallpaperTask
+import com.zexfer.lufram.database.tasks.DiscreteWallpaperTask
+import com.zexfer.lufram.database.tasks.PutWallpaperTask
 
 object LuframRepository {
 
@@ -25,6 +28,22 @@ object LuframRepository {
 
     fun preferredWallpaperSubtype() =
         luframPrefs.getString(PREF_WALLPAPER_SUBTYPE, "null")
+
+    fun deleteWallpaper(wallpaper: DiscreteWallpaper) {
+        if (preferredWallpaperId() == wallpaper.id)
+            stopWallpaper()
+        DeleteWallpaperTask().execute(wallpaper)
+    }
+
+    fun deleteDiscreteWallpaper(id: Int) {
+        if (preferredWallpaperId() == id)
+            stopWallpaper()
+        DeleteDiscreteWallpaperByIdTask().execute(id)
+    }
+
+    fun putWallpaper(wallpaper: DiscreteWallpaper) {
+        PutWallpaperTask().execute(wallpaper)
+    }
 
     /**
      * Applies the (discrete) wallpaper and activates alarms for switching
@@ -81,7 +100,7 @@ object LuframRepository {
             luframPrefs.edit().apply {
                 putInt(PREF_UPDATER_ID, oldUpdaterId + 1)
                 putInt(PREF_WALLPAPER_ID, -1)
-                putBoolean(PREF_WAS_STOPPED, false)
+                putBoolean(PREF_WAS_STOPPED, true)
             }.apply()
         }
 
@@ -127,7 +146,7 @@ object LuframRepository {
         ApplyDiscreteWallpaperTask().execute(id)
     }
 
-    class ApplyDiscreteWallpaperTask : LuframDatabase.DiscreteWallpaperTask() {
+    class ApplyDiscreteWallpaperTask : DiscreteWallpaperTask() {
         override fun onPostExecute(result: DiscreteWallpaper?) {
             if (result !== null)
                 LuframRepository.applyWallpaper(result)

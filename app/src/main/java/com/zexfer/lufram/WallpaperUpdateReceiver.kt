@@ -17,8 +17,8 @@ import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_STATE
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_SUBTYPE
 import com.zexfer.lufram.Lufram.Companion.WALLPAPER_DISCRETE
-import com.zexfer.lufram.database.LuframDatabase.DiscreteWallpaperTask
 import com.zexfer.lufram.database.models.DiscreteWallpaper
+import com.zexfer.lufram.database.tasks.DiscreteWallpaperTask
 
 class WallpaperUpdateReceiver : BroadcastReceiver() {
 

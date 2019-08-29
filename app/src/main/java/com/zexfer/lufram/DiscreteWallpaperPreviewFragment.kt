@@ -4,10 +4,12 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.recyclerview.widget.DiffUtil
@@ -56,18 +58,23 @@ class DiscreteWallpaperPreviewFragment :
     }
 
     class ViewHolder(rootCardView: View) : RecyclerView.ViewHolder(rootCardView), OnSharedPreferenceChangeListener,
-        View.OnClickListener {
+        View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
         private val nameView: TextView = rootCardView.findViewById(R.id.text_name)
-
         private val btnMenu: AppCompatImageButton = rootCardView.findViewById(R.id.btn_menu)
-
         private val imagePreview: ImageView = rootCardView.findViewById(R.id.image_preview)
-
         private val btnApply: Button = rootCardView.findViewById(R.id.btn_apply)
+
+        private val popupMenu = PopupMenu(rootCardView.context, btnMenu)
 
         init {
             btnApply.setOnClickListener(this)
+            btnMenu.setOnClickListener(this)
+
+            popupMenu.also {
+                it.menuInflater.inflate(R.menu.menu_discrete_wallpaper_preview, it.menu)
+                it.setOnMenuItemClickListener(this)
+            }
         }
 
         private var boundWallpaperId: Int = -1
@@ -98,7 +105,19 @@ class DiscreteWallpaperPreviewFragment :
                         }
                     }
                 }
+                R.id.btn_menu ->
+                    popupMenu.show()
             }
+        }
+
+        override fun onMenuItemClick(item: MenuItem?): Boolean {
+            when (item?.order) {
+                1 -> { // Delete
+                    LuframRepository.deleteDiscreteWallpaper(boundWallpaperId)
+                }
+            }
+
+            return false
         }
 
         override fun onSharedPreferenceChanged(luframPrefs: SharedPreferences?, changedPref: String?) {
