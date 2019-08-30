@@ -3,24 +3,29 @@ package com.zexfer.lufram
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.ViewPager
 import com.koushikdutta.ion.Ion
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_SUBTYPE
 import com.zexfer.lufram.Lufram.Companion.WALLPAPER_DISCRETE
 import com.zexfer.lufram.database.models.DiscreteWallpaper
+import java.util.*
 
 class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpaper>() {
 
@@ -39,6 +44,44 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
     class Adapter(private val inflater: LayoutInflater) :
         ListAdapter<DiscreteWallpaper, ViewHolder>(DIFF_CALLBACK) {
 
+        private var attachCount = 0
+
+        private var animateTimer: Timer? = null
+
+        private val animateTask = SwitchPreviewImageTask()
+
+        private val animateStartupListener = object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                val layoutManager = recyclerView.layoutManager
+
+                if (!(layoutManager is LinearLayoutManager)) {
+                    return
+                }
+
+                val startPos = layoutManager.findFirstVisibleItemPosition()
+                val endPos = layoutManager.findLastVisibleItemPosition()
+
+                for (i in startPos..endPos) {
+                    animateTask.bind(
+                        recyclerView.findViewHolderForAdapterPosition(i)
+                                as ViewHolder
+                    )
+                }
+            }
+        }
+
+        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+            ++attachCount
+
+            if (animateTimer === null) {
+                animateTimer = Timer()
+                animateTimer!!.scheduleAtFixedRate(animateTask, 1500, 2500)
+            }
+
+            recyclerView.addOnScrollListener(animateStartupListener)
+        }
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
             ViewHolder(inflater.inflate(R.layout.layout_discrete_wallpaper, parent, false))
 
@@ -47,49 +90,94 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
         }
 
         override fun onViewAttachedToWindow(holder: ViewHolder) {
-            super.onViewAttachedToWindow(holder)
             LuframRepository.luframPrefs.registerOnSharedPreferenceChangeListener(holder)
+            animateTask.bind(holder)
         }
 
         override fun onViewDetachedFromWindow(holder: ViewHolder) {
-            super.onViewDetachedFromWindow(holder)
             LuframRepository.luframPrefs.unregisterOnSharedPreferenceChangeListener(holder)
+            animateTask.unbind(holder)
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            recyclerView.removeOnScrollListener(animateStartupListener)
+            --attachCount
+
+            if (attachCount == 0) {
+                animateTask.clear()
+                animateTimer?.cancel()
+                animateTimer = null
+            }
         }
     }
 
     class ViewHolder(private val rootCardView: View) : RecyclerView.ViewHolder(rootCardView),
-        OnSharedPreferenceChangeListener, View.OnClickListener, PopupMenu.OnMenuItemClickListener {
+        OnSharedPreferenceChangeListener, View.OnClickListener {
 
+        private val previewPager: ViewPager = rootCardView.findViewById(R.id.image_preview_pager)
         private val nameView: TextView = rootCardView.findViewById(R.id.text_name)
-        private val btnMenu: AppCompatImageButton = rootCardView.findViewById(R.id.btn_menu)
-        private val imagePreview: ImageView = rootCardView.findViewById(R.id.image_preview)
         private val btnApply: Button = rootCardView.findViewById(R.id.btn_apply)
+        private val btnEdit: AppCompatImageButton = rootCardView.findViewById(R.id.btn_edit)
+        private val btnDelete: AppCompatImageButton = rootCardView.findViewById(R.id.btn_delete)
 
-        private val popupMenu = PopupMenu(rootCardView.context, btnMenu)
-
-        init {
-            btnApply.setOnClickListener(this)
-            btnMenu.setOnClickListener(this)
-
-            popupMenu.also {
-                it.menuInflater.inflate(R.menu.menu_discrete_wallpaper_preview, it.menu)
-                it.setOnMenuItemClickListener(this)
-            }
-        }
-
+        private var shownPreviewImageIndex: Int = 0
         private var boundWallpaper: DiscreteWallpaper? = null
         private var boundWallpaperId: Int = -1
+
+        private val previewAdapter = object : PagerAdapter() {
+            override fun instantiateItem(container: ViewGroup, position: Int): Any {
+                val uri = boundWallpaper!!.inputURIs[position].toString()
+
+                return ImageView(rootCardView.context).apply {
+                    Ion.with(this)
+                        .load(uri)
+
+                    adjustViewBounds = true
+                    scaleType = ImageView.ScaleType.CENTER_CROP
+                    layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                }.also {
+                    container.addView(it)
+                }
+            }
+
+            override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
+                container.removeView(`object` as View)
+            }
+
+            override fun isViewFromObject(view: View, `object`: Any): Boolean =
+                view === `object`
+
+            override fun getCount(): Int =
+                boundWallpaper?.inputURIs?.size ?: 0
+        }
+
+        init {
+            previewPager.adapter = previewAdapter
+            btnApply.setOnClickListener(this)
+            btnEdit.setOnClickListener(this)
+            btnDelete.setOnClickListener(this)
+        }
 
         fun bindTo(wallpaper: DiscreteWallpaper) {
             nameView.text = wallpaper.name
             boundWallpaper = wallpaper
             boundWallpaperId = wallpaper.id ?: -1
+            shownPreviewImageIndex = 0
 
-            Ion.with(imagePreview)
-                .load(wallpaper.inputURIs[0].toString())
-
-            // one-time fire for "Stop"/"Apply" check!
+            previewAdapter.notifyDataSetChanged()
             onSharedPreferenceChanged(LuframRepository.luframPrefs, PREF_WALLPAPER_ID)
+        }
+
+        fun slidePreviewImage() {
+            Handler(Looper.getMainLooper()).post {
+                if (shownPreviewImageIndex != previewPager.currentItem) {
+                    shownPreviewImageIndex = previewPager.currentItem
+                    return@post // give the user a little more time!
+                }
+
+                shownPreviewImageIndex = (shownPreviewImageIndex + 1) % boundWallpaper!!.inputURIs.size
+                previewPager.setCurrentItem(shownPreviewImageIndex, true)
+            }
         }
 
         override fun onClick(view: View?) {
@@ -107,26 +195,17 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
                         }
                     }
                 }
-                R.id.btn_menu ->
-                    popupMenu.show()
-            }
-        }
-
-        override fun onMenuItemClick(item: MenuItem?): Boolean {
-            when (item?.order) {
-                1 -> { // Delete
-                    LuframRepository.deleteDiscreteWallpaper(boundWallpaperId)
-                }
-                2 -> { // Edit
+                R.id.btn_edit -> {
                     Navigation.findNavController(rootCardView)
                         .navigate(R.id.action_discreteWallpaperPreviewFragment2_to_discreteWallpaperEditorFragment2,
                             Bundle().apply {
                                 putParcelable("source", boundWallpaper)
                             })
                 }
+                R.id.btn_delete -> {
+                    LuframRepository.deleteDiscreteWallpaper(boundWallpaperId)
+                }
             }
-
-            return false
         }
 
         override fun onSharedPreferenceChanged(luframPrefs: SharedPreferences?, changedPref: String?) {
@@ -140,6 +219,29 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
             } else {
                 btnApply.text = "Apply"
             }
+        }
+    }
+
+    class SwitchPreviewImageTask : TimerTask() {
+
+        private val targetCards: MutableList<ViewHolder> = mutableListOf()
+
+        fun bind(cardHolder: ViewHolder) {
+            if (!targetCards.contains(cardHolder))
+                targetCards.add(cardHolder)
+        }
+
+        fun unbind(cardHolder: ViewHolder) {
+            targetCards.remove(cardHolder)
+        }
+
+        override fun run() {
+            for (cardHolder in targetCards)
+                cardHolder.slidePreviewImage()
+        }
+
+        fun clear() {
+            targetCards.clear()
         }
     }
 

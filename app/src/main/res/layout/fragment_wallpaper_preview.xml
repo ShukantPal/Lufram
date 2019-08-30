@@ -7,7 +7,9 @@
             android:id="@+id/rv_root"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="8dp"
+            android:clipToPadding="false"
+            android:paddingBottom="88dp"
+            android:paddingTop="8dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
     <TextView
             android:id="@+id/text_none"
