@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
@@ -38,6 +39,7 @@ class DiscreteWallpaperEditorFragment : Fragment(), View.OnClickListener, Thumbn
     private lateinit var inputRandomizeOrder: Switch
 
     private lateinit var rvWallpaperThumbnails: RecyclerView
+    private lateinit var textAddPhotos: TextView
     private lateinit var btnSubmit: Button
     private lateinit var fabAddWallpaper: FloatingActionButton
 
@@ -74,6 +76,7 @@ class DiscreteWallpaperEditorFragment : Fragment(), View.OnClickListener, Thumbn
             inputIntervalMinutes = it.findViewById(R.id.text_interval)
             inputRandomizeOrder = it.findViewById(R.id.switch_randomize_order)
             rvWallpaperThumbnails = it.findViewById(R.id.rv_wallpaper_thumbnails)
+            textAddPhotos = it.findViewById(R.id.text_wp)
 
             btnSubmit = it.findViewById(R.id.btn_submit)
             fabAddWallpaper = it.findViewById(R.id.fab_add_wp)
@@ -107,6 +110,13 @@ class DiscreteWallpaperEditorFragment : Fragment(), View.OnClickListener, Thumbn
 
             thumbAdapter.submitList(ArrayList(wallpaperUris))
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        textAddPhotos.visibility = if (wallpaperUris.size > 0)
+            View.GONE else View.VISIBLE
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

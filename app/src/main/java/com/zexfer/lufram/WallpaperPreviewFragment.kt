@@ -18,7 +18,8 @@ import androidx.recyclerview.widget.RecyclerView
  * Generic wallpaper preview fragment that allows wallpaper type-specific
  * customization.
  */
-open class WallpaperPreviewFragment<WallpaperType> : Fragment() {
+open class WallpaperPreviewFragment<WallpaperType> :
+    Fragment() {
 
     private var rvRoot: RecyclerView? = null
 
@@ -102,10 +103,5 @@ open class WallpaperPreviewFragment<WallpaperType> : Fragment() {
     interface WallpaperListProvider {
 
         fun visibleWallpapers(adapterId: Int): LiveData<Any>
-    }
-
-    companion object {
-        @JvmStatic
-        val ARG_PREVIEW_FACTORY = "Preview@ViewFactory"
     }
 }

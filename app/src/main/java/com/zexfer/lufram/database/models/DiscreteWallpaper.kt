@@ -33,7 +33,7 @@ data class DiscreteWallpaper(
         dest?.writeString(name)
         dest?.writeParcelableArray(inputURIs, flags)
         dest?.writeLong(interval)
-        dest?.writeBoolean(randomizeOrder)
+        dest?.writeInt(if (randomizeOrder) 1 else 0)
         dest?.writeInt(id ?: -1)
     }
 
@@ -48,8 +48,8 @@ data class DiscreteWallpaper(
 
         return (other.name.equals(this.name) &&
                 other.inputURIs.contentDeepEquals(this.inputURIs) &&
-                other.interval === this.interval &&
-                other.randomizeOrder === this.randomizeOrder &&
+                other.interval == this.interval &&
+                other.randomizeOrder == this.randomizeOrder &&
                 other.id === this.id)
     }
 
@@ -66,8 +66,8 @@ data class DiscreteWallpaper(
                 DiscreteWallpaper(source?.readString() ?: "",
                     castToUriArray(source?.readParcelableArray(Uri::class.java.classLoader) ?: arrayOf()),
                     source?.readLong() ?: 0,
-                    source?.readBoolean() ?: false,
-                    source?.readInt().let { if (it === -1) null else it })
+                    source?.readInt() == 1,
+                    source?.readInt().let { if (it == -1) null else it })
 
             override fun newArray(count: Int): Array<DiscreteWallpaper?> =
                 arrayOfNulls<DiscreteWallpaper>(count)

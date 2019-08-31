@@ -35,7 +35,8 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
 
     override fun onCreate(savedInstanceState: Bundle?) {
         listAdapter = Adapter(
-            activity?.layoutInflater ?: throw IllegalStateException("LayoutInflater is not present, cannot continue!")
+            activity?.layoutInflater
+                ?: throw IllegalStateException("LayoutInflater is not present, cannot continue!")
         )
 
         super.onCreate(savedInstanceState)

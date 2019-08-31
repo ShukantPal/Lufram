@@ -2,11 +2,13 @@ package com.zexfer.lufram
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
+import androidx.navigation.ui.NavigationUI
 import com.google.android.material.snackbar.Snackbar
 import com.zexfer.lufram.database.models.DiscreteWallpaper
 
@@ -16,6 +18,11 @@ class MainActivity : AppCompatActivity(), WallpaperPreviewFragment.WallpaperList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.app_bar))
+
+        NavigationUI.setupActionBarWithNavController(
+            this,
+            Navigation.findNavController(findViewById(R.id.nav_host_fragment))
+        )
     }
 
     override fun onStart() {
@@ -45,6 +52,16 @@ class MainActivity : AppCompatActivity(), WallpaperPreviewFragment.WallpaperList
         }
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
     fun onAddWallpaperClick(fab: View?) {
         Navigation.findNavController(this, R.id.nav_host_fragment)
             .navigate(R.id.action_discreteWallpaperPreviewFragment2_to_discreteWallpaperEditorFragment2)
@@ -61,5 +78,8 @@ class MainActivity : AppCompatActivity(), WallpaperPreviewFragment.WallpaperList
 
         @JvmStatic
         val EDIT_DISCRETE_WALLPAPER = 2
+
+        @JvmStatic
+        val ORDER_EXTRACT_HEIF = 1001
     }
 }
