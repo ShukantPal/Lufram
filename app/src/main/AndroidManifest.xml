@@ -2,8 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.zexfer.lufram"
         android:versionCode="2"
-        android:versionName="Discrete"
-        android:versionCodeMajor="1">
+        android:versionName="Discrete">
 
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <application
