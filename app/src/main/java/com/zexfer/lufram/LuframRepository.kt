@@ -10,9 +10,7 @@ import com.zexfer.lufram.Lufram.Companion.EXTRA_UPDATER_ID
 import com.zexfer.lufram.Lufram.Companion.LUFRAM_PREFS
 import com.zexfer.lufram.Lufram.Companion.PREF_UPDATER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
-import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_SUBTYPE
 import com.zexfer.lufram.Lufram.Companion.PREF_WAS_STOPPED
-import com.zexfer.lufram.Lufram.Companion.WALLPAPER_DISCRETE
 import com.zexfer.lufram.database.models.WallpaperCollection
 import com.zexfer.lufram.database.tasks.DeleteWallpaperByIdTask
 import com.zexfer.lufram.database.tasks.DeleteWallpaperTask
@@ -25,9 +23,6 @@ object LuframRepository {
 
     fun preferredWallpaperId() =
         luframPrefs.getInt(PREF_WALLPAPER_ID, -1)
-
-    fun preferredWallpaperSubtype() =
-        luframPrefs.getString(PREF_WALLPAPER_SUBTYPE, "null")
 
     fun deleteWallpaper(wallpaper: WallpaperCollection) {
         if (preferredWallpaperId() == wallpaper.id)
@@ -61,7 +56,6 @@ object LuframRepository {
                 PREF_WALLPAPER_ID,
                 wallpaper.id ?: throw IllegalStateException("Cannot apply a wallpaper with invalid id!")
             )
-            putString(PREF_WALLPAPER_SUBTYPE, WALLPAPER_DISCRETE)
             putInt(PREF_UPDATER_ID, oldUpdaterId + 1) // stop any previous updaters!
             putBoolean(PREF_WAS_STOPPED, false)
         }.apply()
@@ -116,6 +110,11 @@ object LuframRepository {
                     0
                 )
             )
+    }
+
+    fun safeStopWallpaper(updaterId: Int, writeUpdaterId: Boolean = true) {
+        if (preferredWallpaperId() == updaterId)
+            stopWallpaper(writeUpdaterId)
     }
 
     /**

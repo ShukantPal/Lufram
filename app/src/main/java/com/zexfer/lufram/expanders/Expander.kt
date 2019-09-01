@@ -11,6 +11,12 @@ interface Expander {
 
     fun load(context: Context, index: Int, callback: ((Bitmap) -> Unit)?): Future<Bitmap>
 
+    /**
+     * Should delete any null wallpapers (as returned by load())
+     * from the collection's record!
+     */
+    fun cut(index: Int)
+
     companion object {
         fun open(wc: WallpaperCollection): Expander {
             when (wc.formatType) {

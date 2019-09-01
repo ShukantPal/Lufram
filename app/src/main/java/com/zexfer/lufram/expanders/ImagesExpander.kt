@@ -29,4 +29,11 @@ class ImagesExpander(private val wc: WallpaperCollection) : Expander {
                         callback(bitmap)
                     }
             }
+
+    override fun cut(index: Int) {
+        wc.sources = wc.sources.toMutableList().run {
+            removeAt(index)
+            toTypedArray()
+        }
+    }
 }

@@ -35,11 +35,7 @@ class Lufram : Application() {
         val LUFRAM_DB = "LuframDatabase"
 
         // Custom intent extras used throughout the codebase
-
-        @JvmStatic
         val EXTRA_WALLPAPER = "Result@TargetWallpaper"
-
-        @JvmStatic
         val EXTRA_UPDATER_ID = "Result@UpdaterId"
 
         // Ids for different wallpaper-preview adapters
@@ -48,29 +44,15 @@ class Lufram : Application() {
         val ADAPTER_DISCRETE = 1
 
         // SharedPreferences keys
-
-        @JvmStatic
         val LUFRAM_PREFS = "LuframPrefs"
-
-        @JvmStatic
-        val PREF_WALLPAPER_SUBTYPE = "Type@PreferredWallpaper"
-
-        @JvmStatic
         val PREF_WALLPAPER_ID = "Id@PreferredWallpaper"
-
-        @JvmStatic
-        val PREF_WALLPAPER_STATE = "State@PreferredWallpaper" // used by each type of wallpaper service
-
-        @JvmStatic
+        val PREF_WALLPAPER_INDEX =
+            "State@PreferredWallpaper" // used by each type of wallpaper service
         val PREF_WAS_STOPPED = "was_stopped" // if wallpaper was stopped by user
-
-        @JvmStatic
         val PREF_UPDATER_ID =
             "UpdaterId@PreferredWallpaper" // incremented each time preferred wallpaper changes, so old updaters stop
 
         // SharedPrefs.PREF_WALLPAPER_SUBTYPE values
-
-        @JvmStatic
         val WALLPAPER_DISCRETE = "Type=DiscreteDeprecatedWallpaperCollection"
     }
 }
