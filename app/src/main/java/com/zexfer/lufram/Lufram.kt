@@ -71,6 +71,6 @@ class Lufram : Application() {
         // SharedPrefs.PREF_WALLPAPER_SUBTYPE values
 
         @JvmStatic
-        val WALLPAPER_DISCRETE = "Type=DiscreteWallpaper"
+        val WALLPAPER_DISCRETE = "Type=DiscreteDeprecatedWallpaperCollection"
     }
 }

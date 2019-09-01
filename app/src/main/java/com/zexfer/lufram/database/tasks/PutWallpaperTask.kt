@@ -2,20 +2,13 @@ package com.zexfer.lufram.database.tasks
 
 import android.os.AsyncTask
 import com.zexfer.lufram.database.LuframDatabase
-import com.zexfer.lufram.database.models.DiscreteWallpaper
-import com.zexfer.lufram.database.models.Wallpaper
+import com.zexfer.lufram.database.models.WallpaperCollection
 
-class PutWallpaperTask : AsyncTask<Wallpaper, Void, Void>() {
-    override fun doInBackground(vararg wps: Wallpaper?): Void? {
-        for (wp in wps) {
-            if (wp is DiscreteWallpaper) {
-                val rowId = LuframDatabase.instance.discreteWallpaperDao().put(wp)
-
-                if (wp.id == null)
-                    wp.id = rowId.toInt()// TODO: Solve rowId problem
-            }
-        }
-
+class PutWallpaperTask : AsyncTask<WallpaperCollection, Void, Void>() {
+    override fun doInBackground(vararg wps: WallpaperCollection?): Void? {
+        LuframDatabase.instance
+            .wcDao()
+            .put(wps[0]!!) // TODO: Allow multiple inseration simultaneously
         return null
     }
 }

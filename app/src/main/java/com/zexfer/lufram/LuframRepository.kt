@@ -13,11 +13,11 @@ import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_SUBTYPE
 import com.zexfer.lufram.Lufram.Companion.PREF_WAS_STOPPED
 import com.zexfer.lufram.Lufram.Companion.WALLPAPER_DISCRETE
-import com.zexfer.lufram.database.models.DiscreteWallpaper
-import com.zexfer.lufram.database.tasks.DeleteDiscreteWallpaperByIdTask
+import com.zexfer.lufram.database.models.WallpaperCollection
+import com.zexfer.lufram.database.tasks.DeleteWallpaperByIdTask
 import com.zexfer.lufram.database.tasks.DeleteWallpaperTask
-import com.zexfer.lufram.database.tasks.DiscreteWallpaperTask
 import com.zexfer.lufram.database.tasks.PutWallpaperTask
+import com.zexfer.lufram.database.tasks.WallpaperTask
 
 object LuframRepository {
 
@@ -29,19 +29,19 @@ object LuframRepository {
     fun preferredWallpaperSubtype() =
         luframPrefs.getString(PREF_WALLPAPER_SUBTYPE, "null")
 
-    fun deleteWallpaper(wallpaper: DiscreteWallpaper) {
+    fun deleteWallpaper(wallpaper: WallpaperCollection) {
         if (preferredWallpaperId() == wallpaper.id)
             stopWallpaper()
         DeleteWallpaperTask().execute(wallpaper)
     }
 
-    fun deleteDiscreteWallpaper(id: Int) {
+    fun deleteWallpaper(id: Int) {
         if (preferredWallpaperId() == id)
             stopWallpaper()
-        DeleteDiscreteWallpaperByIdTask().execute(id)
+        DeleteWallpaperByIdTask().execute(id)
     }
 
-    fun putWallpaper(wallpaper: DiscreteWallpaper) {
+    fun putWallpaper(wallpaper: WallpaperCollection) {
         PutWallpaperTask().execute(wallpaper)
     }
 
@@ -49,9 +49,9 @@ object LuframRepository {
      * Applies the (discrete) wallpaper and activates alarms for switching
      * through each input.
      */
-    fun applyWallpaper(wallpaper: DiscreteWallpaper) {
+    fun applyWallpaper(wallpaper: WallpaperCollection) {
         val oldUpdaterId = luframPrefs.getInt(PREF_UPDATER_ID, 0)
-        val intervalMillis = wallpaper.interval
+        val intervalMillis = 60000.toLong() // wallpaper.interval
 
         Log.d("Lufram", "Interval=${intervalMillis}")
         stopWallpaper(false)
@@ -73,12 +73,11 @@ object LuframRepository {
                 intervalMillis,
                 PendingIntent.getBroadcast(
                     Lufram.instance,
-                    0,
+                    oldUpdaterId + 1,
                     Intent(
                         Lufram.instance,
                         WallpaperUpdateReceiver::class.java
                     ).apply {
-                        identifier = "UpdaterId=${oldUpdaterId + 1}"
                         putExtra(EXTRA_UPDATER_ID, oldUpdaterId + 1)
                     },
                     0
@@ -109,13 +108,11 @@ object LuframRepository {
             .cancel(
                 PendingIntent.getBroadcast(
                     Lufram.instance,
-                    0,
+                    oldUpdaterId,
                     Intent(
                         Lufram.instance,
                         WallpaperUpdateReceiver::class.java
-                    ).apply {
-                        identifier = "UpdaterId=${oldUpdaterId}" // of course, we assume older updaters don't exist!
-                    },
+                    ),
                     0
                 )
             )
@@ -132,22 +129,20 @@ object LuframRepository {
         luframPrefs.getBoolean(PREF_WAS_STOPPED, true) ||
                 PendingIntent.getBroadcast(
                     Lufram.instance,
-                    0,
+                    luframPrefs.getInt(PREF_UPDATER_ID, 0),
                     Intent(
                         Lufram.instance,
                         WallpaperUpdateReceiver::class.java
-                    ).apply {
-                        identifier = "UpdaterId=${luframPrefs.getInt(PREF_UPDATER_ID, 0)}"
-                    },
+                    ),
                     PendingIntent.FLAG_NO_CREATE
                 ) != null
 
-    fun applyDiscreteWallpaper(id: Int) {
-        ApplyDiscreteWallpaperTask().execute(id)
+    fun applyWallpaper(id: Int) {
+        ApplyWallpaperTask().execute(id)
     }
 
-    class ApplyDiscreteWallpaperTask : DiscreteWallpaperTask() {
-        override fun onPostExecute(result: DiscreteWallpaper?) {
+    class ApplyWallpaperTask : WallpaperTask() {
+        override fun onPostExecute(result: WallpaperCollection?) {
             if (result !== null)
                 LuframRepository.applyWallpaper(result)
             else {

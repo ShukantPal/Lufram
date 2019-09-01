@@ -1,18 +1,18 @@
 package com.zexfer.lufram
 
 import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageButton
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,35 +20,49 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
-import com.koushikdutta.ion.Ion
-import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
-import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_SUBTYPE
-import com.zexfer.lufram.Lufram.Companion.WALLPAPER_DISCRETE
-import com.zexfer.lufram.database.models.DiscreteWallpaper
+import com.zexfer.lufram.database.LuframDatabase
+import com.zexfer.lufram.database.models.WallpaperCollection
+import com.zexfer.lufram.expanders.Expander
 import java.util.*
 
-class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpaper>() {
+class WCPreviewFragment : Fragment() {
 
-    init {
-        adapterId = Lufram.ADAPTER_DISCRETE
+    private var rvRoot: RecyclerView? = null
+    private var textEmptyLibrary: TextView? = null
+    private var wcListAdapter: WCListAdapter? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? =
+        inflater.inflate(R.layout.fragment_wallpaper_preview, container, false).also {
+            rvRoot = it.findViewById(R.id.rv_root)
+            textEmptyLibrary = it.findViewById(R.id.text_none)
+            wcListAdapter = WCListAdapter(inflater)
+
+            rvRoot!!.adapter = wcListAdapter
+
+            LuframDatabase.instance
+                .wcDao()
+                .all()
+                .observe(this, Observer<List<WallpaperCollection>> {
+                    wcListAdapter!!.submitList(ArrayList(it))
+                })
+        }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        rvRoot = null
+        textEmptyLibrary = null
+        wcListAdapter = null
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        listAdapter = Adapter(
-            activity?.layoutInflater
-                ?: throw IllegalStateException("LayoutInflater is not present, cannot continue!")
-        )
-
-        super.onCreate(savedInstanceState)
-    }
-
-    class Adapter(private val inflater: LayoutInflater) :
-        ListAdapter<DiscreteWallpaper, ViewHolder>(DIFF_CALLBACK) {
+    class WCListAdapter(private val inflater: LayoutInflater) :
+        ListAdapter<WallpaperCollection, ViewHolder>(DIFF_CALLBACK) {
 
         private var attachCount = 0
-
         private var animateTimer: Timer? = null
-
         private val animateTask = SwitchPreviewImageTask()
 
         private val animateStartupListener = object : RecyclerView.OnScrollListener() {
@@ -83,8 +97,17 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
             recyclerView.addOnScrollListener(animateStartupListener)
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-            ViewHolder(inflater.inflate(R.layout.layout_discrete_wallpaper, parent, false))
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int
+        ): ViewHolder =
+            ViewHolder(
+                inflater.inflate(
+                    R.layout.layout_discrete_wallpaper,
+                    parent,
+                    false
+                )
+            )
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.bindTo(getItem(position))
@@ -113,7 +136,7 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
     }
 
     class ViewHolder(private val rootCardView: View) : RecyclerView.ViewHolder(rootCardView),
-        OnSharedPreferenceChangeListener, View.OnClickListener {
+        SharedPreferences.OnSharedPreferenceChangeListener, View.OnClickListener {
 
         private val previewPager: ViewPager = rootCardView.findViewById(R.id.image_preview_pager)
         private val nameView: TextView = rootCardView.findViewById(R.id.text_name)
@@ -122,20 +145,23 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
         private val btnDelete: AppCompatImageButton = rootCardView.findViewById(R.id.btn_delete)
 
         private var shownPreviewImageIndex: Int = 0
-        private var boundWallpaper: DiscreteWallpaper? = null
+        private var imageExpander: Expander? = null
+        private var boundWallpaper: WallpaperCollection? = null
         private var boundWallpaperId: Int = -1
 
         private val previewAdapter = object : PagerAdapter() {
             override fun instantiateItem(container: ViewGroup, position: Int): Any {
-                val uri = boundWallpaper!!.inputURIs[position].toString()
-
                 return ImageView(rootCardView.context).apply {
-                    Ion.with(this)
-                        .load(uri)
+                    imageExpander!!.load(context, position) {
+                        setImageBitmap(it)
+                    }
 
                     adjustViewBounds = true
                     scaleType = ImageView.ScaleType.CENTER_CROP
-                    layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
                 }.also {
                     container.addView(it)
                 }
@@ -149,7 +175,7 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
                 view === `object`
 
             override fun getCount(): Int =
-                boundWallpaper?.inputURIs?.size ?: 0
+                imageExpander?.size ?: 0
         }
 
         init {
@@ -159,14 +185,15 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
             btnDelete.setOnClickListener(this)
         }
 
-        fun bindTo(wallpaper: DiscreteWallpaper) {
-            nameView.text = wallpaper.name
+        fun bindTo(wallpaper: WallpaperCollection) {
+            nameView.text = wallpaper.label
             boundWallpaper = wallpaper
             boundWallpaperId = wallpaper.id ?: -1
             shownPreviewImageIndex = 0
+            imageExpander = Expander.open(boundWallpaper!!)
 
             previewAdapter.notifyDataSetChanged()
-            onSharedPreferenceChanged(LuframRepository.luframPrefs, PREF_WALLPAPER_ID)
+            onSharedPreferenceChanged(LuframRepository.luframPrefs, Lufram.PREF_WALLPAPER_ID)
         }
 
         fun slidePreviewImage() {
@@ -176,7 +203,8 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
                     return@post // give the user a little more time!
                 }
 
-                shownPreviewImageIndex = (shownPreviewImageIndex + 1) % boundWallpaper!!.inputURIs.size
+                shownPreviewImageIndex =
+                    (shownPreviewImageIndex + 1) % boundWallpaper!!.sources.size
                 previewPager.setCurrentItem(shownPreviewImageIndex, true)
             }
         }
@@ -190,7 +218,7 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
                 R.id.btn_apply -> {
                     if (boundWallpaper?.id !== null) {
                         if (btnApply.text.equals("Apply")) {
-                            LuframRepository.applyDiscreteWallpaper(boundWallpaperId)
+                            LuframRepository.applyWallpaper(boundWallpaperId)
                         } else {
                             LuframRepository.stopWallpaper()
                         }
@@ -198,21 +226,22 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
                 }
                 R.id.btn_edit -> {
                     Navigation.findNavController(rootCardView)
-                        .navigate(R.id.action_discreteWallpaperPreviewFragment2_to_discreteWallpaperEditorFragment2,
+                        .navigate(R.id.action_WCPreviewFragment_to_WCEditorFragment,
                             Bundle().apply {
                                 putParcelable("source", boundWallpaper)
                             })
                 }
                 R.id.btn_delete -> {
-                    LuframRepository.deleteDiscreteWallpaper(boundWallpaperId)
+                    LuframRepository.deleteWallpaper(boundWallpaperId)
                 }
             }
         }
 
-        override fun onSharedPreferenceChanged(luframPrefs: SharedPreferences?, changedPref: String?) {
-            if (changedPref !== PREF_WALLPAPER_ID ||
-                !luframPrefs?.getString(PREF_WALLPAPER_SUBTYPE, "null").equals(WALLPAPER_DISCRETE)
-            )
+        override fun onSharedPreferenceChanged(
+            luframPrefs: SharedPreferences?,
+            changedPref: String?
+        ) {
+            if (changedPref !== Lufram.PREF_WALLPAPER_ID)
                 return
 
             if (luframPrefs?.getInt(changedPref, -1) == boundWallpaperId) {
@@ -248,17 +277,20 @@ class DiscreteWallpaperPreviewFragment : WallpaperPreviewFragment<DiscreteWallpa
 
     companion object {
         @JvmStatic
-        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<DiscreteWallpaper>() {
-            override fun areItemsTheSame(oldItem: DiscreteWallpaper, newItem: DiscreteWallpaper): Boolean {
-                return oldItem.equals(newItem)
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<WallpaperCollection>() {
+            override fun areItemsTheSame(
+                oldItem: WallpaperCollection,
+                newItem: WallpaperCollection
+            ): Boolean {
+                return oldItem.id == newItem.id
             }
 
-            override fun areContentsTheSame(oldItem: DiscreteWallpaper, newItem: DiscreteWallpaper): Boolean {
-                return oldItem.equals(newItem)
+            override fun areContentsTheSame(
+                oldItem: WallpaperCollection,
+                newItem: WallpaperCollection
+            ): Boolean {
+                return oldItem == newItem
             }
         }
-
-        @JvmStatic
-        val EDIT_DISCRETE_WALLPAPER = 102
     }
 }

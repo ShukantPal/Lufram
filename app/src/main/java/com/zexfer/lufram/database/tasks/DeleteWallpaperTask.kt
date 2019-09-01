@@ -2,15 +2,15 @@ package com.zexfer.lufram.database.tasks
 
 import android.os.AsyncTask
 import com.zexfer.lufram.database.LuframDatabase
-import com.zexfer.lufram.database.models.DiscreteWallpaper
-import com.zexfer.lufram.database.models.Wallpaper
+import com.zexfer.lufram.database.models.WallpaperCollection
 
-class DeleteWallpaperTask : AsyncTask<Wallpaper, Void, Void>() {
-    override fun doInBackground(vararg wps: Wallpaper?): Void? {
+class DeleteWallpaperTask : AsyncTask<WallpaperCollection, Void, Void>() {
+    override fun doInBackground(vararg wps: WallpaperCollection?): Void? {
         for (wp in wps) {
-            if (wp is DiscreteWallpaper) {
-                LuframDatabase.instance.discreteWallpaperDao().delete(wp)
-            }
+            if (wp !== null)
+                LuframDatabase.instance
+                    .wcDao()
+                    .delete(wp)
         }
 
         return null

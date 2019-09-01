@@ -17,8 +17,8 @@ import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_STATE
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_SUBTYPE
 import com.zexfer.lufram.Lufram.Companion.WALLPAPER_DISCRETE
-import com.zexfer.lufram.database.models.DiscreteWallpaper
-import com.zexfer.lufram.database.tasks.DiscreteWallpaperTask
+import com.zexfer.lufram.database.models.WallpaperCollection
+import com.zexfer.lufram.database.tasks.WallpaperTask
 
 class WallpaperUpdateReceiver : BroadcastReceiver() {
 
@@ -61,9 +61,9 @@ class WallpaperUpdateReceiver : BroadcastReceiver() {
 
     @SuppressWarnings("StaticFieldLeak")
     class UpdateDiscreteWallpaperTask(private var context: Context?) :
-        DiscreteWallpaperTask() {
+        WallpaperTask() {
 
-        override fun onPostExecute(result: DiscreteWallpaper?) {
+        override fun onPostExecute(result: WallpaperCollection?) {
             if (result === null) {
                 Log.w("Lufram", "User deleted wallpaper externally (probably); updater found no result!")
                 return
@@ -75,17 +75,13 @@ class WallpaperUpdateReceiver : BroadcastReceiver() {
 
             val luframPrefs = (context as Context).getSharedPreferences(LUFRAM_PREFS, 0)
             val newOffset: Int = run {
-                if (!result.randomizeOrder) {
-                    luframPrefs.getInt(PREF_WALLPAPER_STATE, 0) + 1
-                } else {
-                    (Math.random() * result.inputURIs.size).toInt()
-                }
+                luframPrefs.getInt(PREF_WALLPAPER_STATE, 0) + 1
             }
 
             (context?.getSystemService(WALLPAPER_SERVICE) as WallpaperManager)
                 .setBitmap(
                     Ion.with(context)
-                        .load(result.inputURIs[newOffset].toString())
+                        .load(result.sources[newOffset].toString())
                         .asBitmap()
                         .get()
                 )
