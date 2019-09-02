@@ -2,17 +2,17 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/main_navigation"
-        app:startDestination="@id/WCPreviewFragment">
-    <fragment
-            android:id="@+id/WCPreviewFragment"
-            android:name="com.zexfer.lufram.WCPreviewFragment"
-            android:label="Your Lufram Library">
-        <action
-                android:id="@+id/action_WCPreviewFragment_to_WCEditorFragment"
-                app:destination="@id/WCEditorFragment" />
-    </fragment>
+        app:startDestination="@id/mainFragment">
     <fragment
             android:id="@+id/WCEditorFragment"
             android:name="com.zexfer.lufram.WCEditorFragment"
             android:label="Edit Collection" />
+    <fragment
+            android:id="@+id/mainFragment"
+            android:name="com.zexfer.lufram.MainFragment"
+            android:label="Lufram">
+        <action
+                android:id="@+id/action_mainFragment_to_WCEditorFragment"
+                app:destination="@id/WCEditorFragment" />
+    </fragment>
 </navigation>

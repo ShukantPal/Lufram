@@ -29,24 +29,14 @@
                 android:text="El Niño"
                 style="@style/TextAppearance.AppCompat.Headline"/>
         <Button
-                android:id="@+id/btn_simulate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:visibility="gone"
-                android:text="Simulate"
-                android:textColor="@color/colorAccent"
-                style="@style/Widget.AppCompat.Button.Borderless"/>
-        <Button
                 android:id="@+id/btn_apply"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_below="@id/text_name"
+                android:layout_marginLeft="20dp"
                 android:text="Apply"
-                android:textColor="@color/colorPrimaryDark"
-                style="@style/Widget.AppCompat.Button.Borderless"/>
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
         <ImageButton
                 android:id="@+id/btn_edit"
                 android:layout_width="wrap_content"

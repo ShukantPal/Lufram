@@ -21,14 +21,4 @@
             android:textStyle="bold"
             android:visibility="invisible"
             style="@style/TextAppearance.AppCompat.Small"/>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_gravity="bottom|right"
-            android:onClick="onAddWallpaperClick"
-            android:src="@drawable/ic_add_white_24dp"
-            style="@style/Widget.MaterialComponents.FloatingActionButton"/>
 </FrameLayout>

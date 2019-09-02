@@ -103,7 +103,7 @@ class WCPreviewFragment : Fragment() {
         ): ViewHolder =
             ViewHolder(
                 inflater.inflate(
-                    R.layout.layout_discrete_wallpaper,
+                    R.layout.layout_wc_card,
                     parent,
                     false
                 )
@@ -226,7 +226,8 @@ class WCPreviewFragment : Fragment() {
                 }
                 R.id.btn_edit -> {
                     Navigation.findNavController(rootCardView)
-                        .navigate(R.id.action_WCPreviewFragment_to_WCEditorFragment,
+                        .navigate(
+                            R.id.action_mainFragment_to_WCEditorFragment,
                             Bundle().apply {
                                 putParcelable("source", boundWallpaper)
                             })

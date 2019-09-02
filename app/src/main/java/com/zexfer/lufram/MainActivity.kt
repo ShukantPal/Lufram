@@ -3,7 +3,6 @@ package com.zexfer.lufram
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
@@ -50,11 +49,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
-    }
-
-    fun onAddWallpaperClick(fab: View?) {
-        Navigation.findNavController(this, R.id.nav_host_fragment)
-            .navigate(R.id.action_WCPreviewFragment_to_WCEditorFragment)
     }
 
     companion object {
