@@ -98,14 +98,17 @@ class WCEditorFragment :
                 )
             }
             R.id.btn_submit -> {
-                val wallpaper = WallpaperCollection(
-                    wallpaperUris!!.toTypedArray(),
-                    FORMAT_IMAGES,
-                    editName!!.text.toString(),
-                    wcId
-                )
+                if (wallpaperUris!!.size > 0) {
+                    val wallpaper = WallpaperCollection(
+                        wallpaperUris!!.toTypedArray(),
+                        FORMAT_IMAGES,
+                        editName!!.text.toString(),
+                        wcId
+                    )
 
-                PutWallpaperTask().execute(wallpaper)
+                    PutWallpaperTask().execute(wallpaper)
+                }
+
                 findNavController().navigateUp()
             }
         }

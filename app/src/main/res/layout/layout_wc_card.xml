@@ -3,9 +3,9 @@
         xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
         app:cardCornerRadius="4dp"
         style="@style/CardView.Light">
     <RelativeLayout
@@ -15,28 +15,31 @@
         <androidx.viewpager.widget.ViewPager
                 android:id="@+id/image_preview_pager"
                 android:layout_width="match_parent"
-                android:layout_height="192dp"
+                android:layout_height="194dp"
                 android:layout_alignParentTop="true"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="8dp"
+                android:background="@android:color/white"
+                android:elevation="1dp" />
         <TextView
                 android:id="@+id/text_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/image_preview_pager"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
                 android:gravity="center"
                 android:text="El Niño"
-                style="@style/TextAppearance.AppCompat.Headline"/>
+                android:textSize="28dp" />
         <Button
                 android:id="@+id/btn_apply"
-                android:layout_width="wrap_content"
+                android:layout_width="80sp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_below="@id/text_name"
-                android:layout_marginLeft="20dp"
+                android:backgroundTint="@android:color/white"
                 android:text="Apply"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.AppCompat.Button.Borderless" />
         <ImageButton
                 android:id="@+id/btn_edit"
                 android:layout_width="wrap_content"
@@ -44,6 +47,8 @@
                 android:layout_below="@id/text_name"
                 android:layout_toLeftOf="@id/btn_delete"
                 android:src="@drawable/ic_edit_black_24dp"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
                 style="@style/Widget.AppCompat.ActionButton"/>
         <ImageButton
                 android:id="@+id/btn_delete"
@@ -52,6 +57,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_below="@id/text_name"
                 android:src="@drawable/ic_delete_black_24dp"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
                 style="@style/Widget.AppCompat.ActionButton"/>
     </RelativeLayout>
 </androidx.cardview.widget.CardView>
