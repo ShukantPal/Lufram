@@ -51,7 +51,6 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
     }
 
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-
     }
 
     override fun onPageScrollStateChanged(state: Int) {

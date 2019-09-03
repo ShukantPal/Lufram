@@ -38,12 +38,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_info_black_24dp"
-                    app:layout_constraintBottom_toBottomOf="@id/picker_interval_min"
+                    app:layout_constraintBottom_toBottomOf="@id/picker_interval_days"
                     app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/picker_interval_min" />
+                    app:layout_constraintTop_toTopOf="@id/picker_interval_days" />
 
             <NumberPicker
-                    android:id="@+id/picker_interval_min"
+                    android:id="@+id/picker_interval_days"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintLeft_toLeftOf="parent"
@@ -56,9 +56,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="2dp"
                     android:text="days"
-                    app:layout_constraintBottom_toBottomOf="@id/picker_interval_min"
-                    app:layout_constraintLeft_toRightOf="@id/picker_interval_min"
-                    app:layout_constraintTop_toTopOf="@id/picker_interval_min" />
+                    app:layout_constraintBottom_toBottomOf="@id/picker_interval_days"
+                    app:layout_constraintLeft_toRightOf="@id/picker_interval_days"
+                    app:layout_constraintTop_toTopOf="@id/picker_interval_days" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 

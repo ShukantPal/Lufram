@@ -52,6 +52,7 @@ class Lufram : Application() {
         val PREF_UPDATER_ID =
             "UpdaterId@PreferredWallpaper" // incremented each time preferred wallpaper changes, so old updaters stop
 
+        val PREF_CONFIG_TYPE = "cfg_type"
         val PREF_CONFIG_INTERVAL_MILLIS = "cfg_interval_millis"
         val PREF_CONFIG_RANDOMIZE_ORDER = "cfg_randomize_order"
         val PREF_CONFIG_DAY_RANGE = "cfg_day_range"

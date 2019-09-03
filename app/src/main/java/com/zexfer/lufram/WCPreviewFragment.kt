@@ -188,9 +188,9 @@ class WCPreviewFragment : Fragment() {
         fun bindTo(wallpaper: WallpaperCollection) {
             nameView.text = wallpaper.label
             boundWallpaper = wallpaper
-            boundWallpaperId = wallpaper.id ?: -1
+            boundWallpaperId = wallpaper.id!!
             shownPreviewImageIndex = 0
-            imageExpander = Expander.open(boundWallpaper!!)
+            imageExpander = Expander.open(wallpaper)
 
             previewAdapter.notifyDataSetChanged()
             onSharedPreferenceChanged(LuframRepository.luframPrefs, Lufram.PREF_WALLPAPER_ID)
@@ -204,7 +204,7 @@ class WCPreviewFragment : Fragment() {
                 }
 
                 shownPreviewImageIndex =
-                    (shownPreviewImageIndex + 1) % boundWallpaper!!.sources.size
+                    (shownPreviewImageIndex + 1) % imageExpander!!.size
                 previewPager.setCurrentItem(shownPreviewImageIndex, true)
             }
         }
@@ -216,8 +216,8 @@ class WCPreviewFragment : Fragment() {
 
             when (view.id) {
                 R.id.btn_apply -> {
-                    if (boundWallpaper?.id !== null) {
-                        if (btnApply.text.equals("Apply")) {
+                    if (boundWallpaperId != -1) {
+                        if (btnApply.text == "Apply") {
                             LuframRepository.applyWallpaper(boundWallpaperId)
                         } else {
                             LuframRepository.stopWallpaper()
@@ -245,7 +245,7 @@ class WCPreviewFragment : Fragment() {
             if (changedPref !== Lufram.PREF_WALLPAPER_ID)
                 return
 
-            if (luframPrefs?.getInt(changedPref, -1) == boundWallpaperId) {
+            if (luframPrefs?.getInt(changedPref, -2) == boundWallpaperId) {
                 btnApply.text = "Stop"
             } else {
                 btnApply.text = "Apply"

@@ -11,6 +11,7 @@ import android.content.Intent
 import android.util.Log
 import com.zexfer.lufram.Lufram.Companion.EXTRA_UPDATER_ID
 import com.zexfer.lufram.Lufram.Companion.LUFRAM_PREFS
+import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_RANDOMIZE_ORDER
 import com.zexfer.lufram.Lufram.Companion.PREF_UPDATER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_INDEX
@@ -63,8 +64,14 @@ class WallpaperUpdateReceiver : BroadcastReceiver() {
 
             val expander = Expander.open(result)
             val luframPrefs = (context as Context).getSharedPreferences(LUFRAM_PREFS, 0)
+            val randomize = luframPrefs.getBoolean(PREF_CONFIG_RANDOMIZE_ORDER, false)
             val newOffset: Int =
-                run { luframPrefs.getInt(PREF_WALLPAPER_INDEX, 0) + 1 } % expander.size
+                run {
+                    if (!randomize)
+                        (luframPrefs.getInt(PREF_WALLPAPER_INDEX, 0) + 1) % expander.size
+                    else
+                        (Math.random() * expander.size).toInt()
+                }
             val wallpaperBmp = expander.load(context!!, newOffset, null).get()
 
             var rerunTask = false
