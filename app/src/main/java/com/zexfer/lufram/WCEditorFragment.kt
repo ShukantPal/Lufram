@@ -11,12 +11,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
 import com.zexfer.lufram.adapters.ThumbnailListAdapter
 import com.zexfer.lufram.database.models.WallpaperCollection
 import com.zexfer.lufram.database.models.WallpaperCollection.Companion.FORMAT_IMAGES
@@ -27,7 +27,7 @@ class WCEditorFragment :
     View.OnClickListener,
     ThumbnailListAdapter.OnCloseThumbListener {
 
-    private var editName: TextView? = null
+    private var editName: TextInputEditText? = null
     private var rvThumbs: RecyclerView? = null
     private var btnAddWallpapers: FloatingActionButton? = null
     private var btnSubmit: Button? = null
@@ -69,14 +69,14 @@ class WCEditorFragment :
 
             if (savedInstanceState !== null) {
                 wcId = savedInstanceState.getInt("wc_id").let { if (it != -1) it else null }
-                editName!!.text = (savedInstanceState.getString("wc_name") ?: "")
+                editName!!.setText(savedInstanceState.getString("wc_name") ?: "")
                 wallpaperUris = savedInstanceState.getParcelableArrayList("wc_uris")
             } else if (arguments !== null) {
                 val source = arguments!!.getParcelable<WallpaperCollection>("source")
 
                 if (source != null) {
                     wcId = source.id
-                    editName!!.text = source.label
+                    editName!!.setText(source.label)
                     wallpaperUris = source.sources.toMutableList()
                 }
             } else {

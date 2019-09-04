@@ -29,13 +29,25 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
         inflater.inflate(R.layout.fragment_main, container, false).also {
             tabsPager = it.findViewById<ViewPager>(R.id.main_pager)
                 .also { pager -> pager.addOnPageChangeListener(this) }
-            tabsLayout = it.findViewById(R.id.tabs)
             fabMain = it.findViewById<FloatingActionButton>(R.id.fab_main)
                 .also { fab -> fab.setOnClickListener(this) }
 
             tabsPager!!.adapter = MainTabsAdapter(childFragmentManager)
             fabShown = true
         }
+
+    override fun onStart() {
+        super.onStart()
+        tabsLayout = activity!!.findViewById(R.id.tabs)
+        tabsLayout!!.setupWithViewPager(tabsPager)
+        tabsLayout!!.visibility = View.VISIBLE
+    }
+
+    override fun onStop() {
+        super.onStop()
+        tabsLayout!!.visibility = View.GONE
+        tabsLayout = null
+    }
 
     override fun onClick(view: View?) {
         when (view?.id) {
