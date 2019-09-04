@@ -4,56 +4,69 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/colorAccentLight"
+        android:padding="8dp"
         android:theme="@style/LuframTheme">
 
-    <TextView
-            android:id="@+id/label_mode"
-            android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+            android:id="@+id/card_top"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Mode"
-            android:textColor="@color/colorPrimaryDark"
+            android:layout_margin="16dp"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            style="@style/LuframTheme.TextAppearance.FormLabel" />
+            app:layout_constraintTop_toTopOf="parent">
 
-    <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/tg_mode"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_mode"
-            app:singleSelection="true">
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <com.google.android.material.button.MaterialButton
-                android:id="@+id/mbtn_mode_periodic"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:text="Periodic"
-                style="?attr/materialButtonOutlinedStyle" />
+            <TextView
+                    android:id="@+id/label_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:text="Mode"
+                    android:textColor="@color/colorPrimaryDark"
+                    style="@style/LuframTheme.TextAppearance.FormLabel" />
 
-        <com.google.android.material.button.MaterialButton
-                android:id="@+id/mbtn_mode_dynamic"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/mbtn_mode_periodic"
-                android:text="Dynamic"
-                style="?attr/materialButtonOutlinedStyle" />
-    </com.google.android.material.button.MaterialButtonToggleGroup>
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/tg_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/label_mode"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal"
+                    app:singleSelection="true">
 
+                <com.google.android.material.button.MaterialButton
+                        android:id="@+id/mbtn_mode_periodic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:text="Periodic"
+                        style="?attr/materialButtonOutlinedStyle" />
+
+                <com.google.android.material.button.MaterialButton
+                        android:id="@+id/mbtn_mode_dynamic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/mbtn_mode_periodic"
+                        android:text="Dynamic"
+                        style="?attr/materialButtonOutlinedStyle" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
     <View
             android:id="@+id/border_pager"
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_marginBottom="8dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginLeft="36dp"
+            android:layout_marginRight="36dp"
+            android:layout_marginTop="16dp"
             android:background="@color/colorPrimaryDark"
-            app:layout_constraintTop_toBottomOf="@id/tg_mode"
+            app:layout_constraintTop_toBottomOf="@id/card_top"
             app:layout_constraintBottom_toTopOf="@id/mode_pager" />
 
     <androidx.viewpager.widget.ViewPager

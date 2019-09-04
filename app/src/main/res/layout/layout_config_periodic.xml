@@ -10,7 +10,7 @@
             style="@style/Widget.MaterialComponents.CardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_margin="8dp"
             app:cardBackgroundColor="@android:color/white"
             app:cardCornerRadius="4dp"
             android:elevation="2dp">
@@ -90,6 +90,8 @@
     <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="4dp"
             style="@style/Widget.MaterialComponents.CardView">
 
         <androidx.constraintlayout.widget.ConstraintLayout
