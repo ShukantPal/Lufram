@@ -40,6 +40,7 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
         super.onStart()
         tabsLayout = activity!!.findViewById(R.id.tabs)
         tabsLayout!!.setupWithViewPager(tabsPager)
+        tabsLayout!!.tabGravity = TabLayout.GRAVITY_CENTER
         tabsLayout!!.visibility = View.VISIBLE
     }
 
