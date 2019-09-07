@@ -3,4 +3,15 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string-array name="autowp_mode">
+        <item>Periodic</item>
+        <item>Dynamic</item>
+    </string-array>
+
+    <string name="cfg_modes_summary">
+        Configure how Lufram switches wallpapers! The classic periodic mode
+        switches wallpapers after specific intervals. The new dynamic mode
+        will set wallpapers based on the time or sun\'s position.
+    </string>
 </resources>

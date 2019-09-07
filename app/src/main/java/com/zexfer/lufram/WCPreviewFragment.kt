@@ -14,10 +14,7 @@ import androidx.appcompat.widget.AppCompatImageButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.zexfer.lufram.database.LuframDatabase
@@ -42,6 +39,7 @@ class WCPreviewFragment : Fragment() {
             wcListAdapter = WCListAdapter(inflater)
 
             rvRoot!!.adapter = wcListAdapter
+            (rvRoot!!.layoutManager as GridLayoutManager).spanCount = 2
 
             LuframDatabase.instance
                 .wcDao()

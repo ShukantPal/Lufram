@@ -33,6 +33,7 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
                 .also { fab -> fab.setOnClickListener(this) }
 
             tabsPager!!.adapter = MainTabsAdapter(childFragmentManager)
+            tabsPager!!.currentItem = 1
             fabShown = true
         }
 
@@ -86,8 +87,8 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
 
         override fun getItem(position: Int): Fragment {
             when (position) {
-                FRAG_LIBRARY -> return WCPreviewFragment()
                 FRAG_CONFIG -> return ConfigFragment()
+                FRAG_LIBRARY -> return WCPreviewFragment()
                 else -> throw IllegalArgumentException("position is invalid!")
             }
         }
@@ -98,8 +99,8 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
 
         override fun getPageTitle(position: Int): CharSequence? {
             when (position) {
-                0 -> return "LIBRARY"
-                1 -> return "CONFIG"
+                FRAG_CONFIG -> return "CONFIG"
+                FRAG_LIBRARY -> return "LIBRARY"
             }
 
             return super.getPageTitle(position)
@@ -107,7 +108,7 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
     }
 
     companion object {
-        val FRAG_LIBRARY = 0
-        val FRAG_CONFIG = 1
+        val FRAG_CONFIG = 0
+        val FRAG_LIBRARY = 1
     }
 }

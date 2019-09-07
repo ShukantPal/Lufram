@@ -1,64 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-        xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+        style="@style/Widget.MaterialComponents.CardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        app:cardCornerRadius="4dp"
-        style="@style/CardView.Light">
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:elevation="3dp">
+
     <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="8dp">
+            android:layout_height="wrap_content">
+
         <androidx.viewpager.widget.ViewPager
                 android:id="@+id/image_preview_pager"
                 android:layout_width="match_parent"
                 android:layout_height="194dp"
                 android:layout_alignParentTop="true"
-                android:layout_marginBottom="8dp"
                 android:background="@android:color/white"
                 android:elevation="1dp" />
+
         <TextView
                 android:id="@+id/text_name"
+                style="@style/MaterialAlertDialog.MaterialComponents.Title.Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/image_preview_pager"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_alignTop="@id/btn_expand"
+                android:layout_alignBottom="@id/btn_expand"
+                android:layout_marginStart="16dp"
                 android:gravity="center"
-                android:text="El Niño"
-                android:textSize="28dp" />
-        <Button
-                android:id="@+id/btn_apply"
-                android:layout_width="80sp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_below="@id/text_name"
-                android:backgroundTint="@android:color/white"
-                android:text="Apply"
-                android:textColor="@color/colorPrimary"
-                style="@style/Widget.AppCompat.Button.Borderless" />
+                android:text="El Niño" />
+
         <ImageButton
-                android:id="@+id/btn_edit"
+                android:id="@+id/btn_expand"
+                style="@style/Widget.AppCompat.ActionButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/text_name"
-                android:layout_toLeftOf="@id/btn_delete"
-                android:src="@drawable/ic_edit_black_24dp"
-                android:scaleX="0.9"
-                android:scaleY="0.9"
-                style="@style/Widget.AppCompat.ActionButton"/>
-        <ImageButton
-                android:id="@+id/btn_delete"
-                android:layout_width="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@id/image_preview_pager"
+                android:src="@drawable/ic_expand_more_black_24dp" />
+
+        <RelativeLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_below="@id/text_name"
-                android:src="@drawable/ic_delete_black_24dp"
-                android:scaleX="0.9"
-                android:scaleY="0.9"
-                style="@style/Widget.AppCompat.ActionButton"/>
+                android:layout_below="@id/btn_expand"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp">
+
+            <View
+                    android:id="@+id/divider_expand"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:background="@color/colorSecondaryVariant" />
+
+            <Button
+                    android:id="@+id/btn_apply"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@id/divider_expand"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:padding="8dp"
+                    android:text="Apply" />
+
+            <ImageButton
+                    android:id="@+id/btn_edit"
+                    style="@style/Widget.AppCompat.ActionButton"
+                    android:layout_width="28dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/divider_expand"
+                    android:layout_alignBottom="@id/btn_apply"
+                    android:layout_toLeftOf="@id/btn_delete"
+                    android:src="@drawable/ic_edit_black_24dp" />
+
+            <ImageButton
+                    android:id="@+id/btn_delete"
+                    style="@style/Widget.AppCompat.ActionButton"
+                    android:layout_width="28dp"
+                    android:layout_height="0dp"
+                    android:layout_margin="0dp"
+                    android:layout_below="@id/divider_expand"
+                    android:layout_alignBottom="@id/btn_apply"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:foregroundGravity="center"
+                    android:src="@drawable/ic_delete_black_24dp" />
+        </RelativeLayout>
     </RelativeLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>
