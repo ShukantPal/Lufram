@@ -16,7 +16,10 @@ data class WallpaperCollection(
     @ColumnInfo(name = "format_type")
     var formatType: Int = FORMAT_IMAGES,
 
-    val label: String = "Untitled Collection",
+    var label: String = "Untitled Collection",
+
+    @ColumnInfo(name = "last_updater_id")
+    var lastUpdaterId: Int = -1,
 
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null
@@ -50,6 +53,7 @@ data class WallpaperCollection(
         dest.writeParcelableArray(sources, flags)
         dest.writeInt(formatType)
         dest.writeString(label)
+        dest.writeInt(lastUpdaterId)
         dest.writeInt(id ?: -1)
     }
 
@@ -68,6 +72,7 @@ data class WallpaperCollection(
                     ),
                     source.readInt(),
                     source.readString() ?: "",
+                    source.readInt(),
                     source.readInt().let { if (it == -1) null else it }
                 )
 

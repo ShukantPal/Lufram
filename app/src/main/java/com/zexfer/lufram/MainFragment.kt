@@ -43,6 +43,10 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
         tabsLayout!!.setupWithViewPager(tabsPager)
         tabsLayout!!.tabGravity = TabLayout.GRAVITY_CENTER
         tabsLayout!!.visibility = View.VISIBLE
+
+        if (!fabShown) {
+            fabMain!!.hide()
+        }
     }
 
     override fun onStop() {

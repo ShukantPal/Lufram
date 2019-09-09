@@ -55,35 +55,17 @@ class ConfigFragment : Fragment(), View.OnClickListener,
                     })
                 }
 
-            if (savedInstanceState !== null) {
-                periodicConfig = LuframRepository.PeriodicConfig(
-                    savedInstanceState.getLong("periodic_cfg_interval_millis"),
-                    savedInstanceState.getBoolean("periodic_cfg_randomize_order")
-                )
-
-                dynamicConfig = LuframRepository.DynamicConfig(
-                    savedInstanceState.getInt("dynamic_cfg_day_range"),
-                    savedInstanceState.getBoolean("dynamic_cfg_time_zone_adjust_enabled")
-                )
-            } else {
-                val prefs = LuframRepository.luframPrefs
-                mode = prefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC) - CONFIG_PERIODIC
-
-                periodicConfig = LuframRepository.PeriodicConfig(
-                    prefs.getLong(PREF_CONFIG_INTERVAL_MILLIS, 3600000),
-                    prefs.getBoolean(PREF_CONFIG_RANDOMIZE_ORDER, false)
-                )
-
-                dynamicConfig = LuframRepository.DynamicConfig(
-                    prefs.getInt(PREF_CONFIG_DAY_RANGE, 1),
-                    prefs.getBoolean(PREF_CONFIG_TIMEZONE_ADJUSTED_ENABLED, false)
-                )
-            }
-
+            updateConfigCache()
             modePager!!.adapter = ModeAdapter(this, periodicConfig!!, dynamicConfig!!)
             modePager!!.currentItem = mode
             textMode!!.text = MODES[mode]
         }
+
+    override fun onResume() {
+        super.onResume()
+        updateConfigCache()
+        (modePager!!.adapter as ModeAdapter).updateConfigs(periodicConfig!!, dynamicConfig!!)
+    }
 
     override fun onPause() {
         super.onPause()
@@ -130,13 +112,36 @@ class ConfigFragment : Fragment(), View.OnClickListener,
             "${hr} : ${min}"
     }
 
+    fun updateConfigCache() {
+        val prefs = LuframRepository.luframPrefs
+        mode = prefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC) - CONFIG_PERIODIC
+
+        periodicConfig = LuframRepository.PeriodicConfig(
+            prefs.getLong(PREF_CONFIG_INTERVAL_MILLIS, 3600000),
+            prefs.getBoolean(PREF_CONFIG_RANDOMIZE_ORDER, false)
+        )
+
+        dynamicConfig = LuframRepository.DynamicConfig(
+            prefs.getInt(PREF_CONFIG_DAY_RANGE, 1),
+            prefs.getBoolean(PREF_CONFIG_TIMEZONE_ADJUSTED_ENABLED, false)
+        )
+    }
+
     class ModeAdapter(
         private val targetFragment: Fragment,
-        private val periodicConfig: LuframRepository.PeriodicConfig,
-        private val dynamicConfig: LuframRepository.DynamicConfig
+        private var periodicConfig: LuframRepository.PeriodicConfig,
+        private var dynamicConfig: LuframRepository.DynamicConfig
     ) : PagerAdapter() {
         private var entryInterval: LinearLayout? = null
         private var entryRandomize: Switch? = null
+
+        fun updateConfigs(
+            periodicConfig: LuframRepository.PeriodicConfig,
+            dynamicConfig: LuframRepository.DynamicConfig
+        ) {
+            this.periodicConfig = periodicConfig
+            this.dynamicConfig = dynamicConfig
+        }
 
         override fun instantiateItem(container: ViewGroup, position: Int): Any {
             when (position) {

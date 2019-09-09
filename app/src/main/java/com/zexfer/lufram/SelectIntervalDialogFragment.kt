@@ -5,11 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.NumberPicker
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
 
-/**
- * A simple [Fragment] subclass.
- */
 class SelectIntervalDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

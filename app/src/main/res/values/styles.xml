@@ -72,6 +72,10 @@
         <item name="android:letterSpacing">0.0</item>
     </style>
 
+    <style name="LuframTheme.TextAppearance.AppBar" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:letterSpacing">0.0</item>
+    </style>
+
     <style name="LuframTheme.TextAppearance.FormLabel">
         <item name="android:textStyle">bold</item>
     </style>

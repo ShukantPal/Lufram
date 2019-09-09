@@ -13,6 +13,10 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:hint="Label"
+            app:boxStrokeColor="@color/colorOnBackground"
+            app:hintTextColor="@color/colorOnBackground"
+            android:outlineSpotShadowColor="@android:color/darker_gray"
+            android:outlineAmbientShadowColor="@color/colorSecondaryVariant"
             app:layout_constraintTop_toTopOf="parent"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
@@ -27,6 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
+            android:focusable="true"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:layout_constraintTop_toBottomOf="@id/input_layout_name"
             app:layout_constraintBottom_toTopOf="@id/separator_btn_submit" />
@@ -46,7 +51,8 @@
             android:id="@+id/separator_btn_submit"
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:background="@color/colorPrimary"
+            android:background="@color/colorSecondaryVariant"
+            app:layout_constraintTop_toBottomOf="@id/rv_wallpaper_thumbnails"
             app:layout_constraintBottom_toTopOf="@id/btn_submit" />
 
     <Button
@@ -54,9 +60,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="@android:color/white"
+            android:padding="0dp"
             android:text="Submit"
-            android:textColor="@color/colorPrimaryDark"
-            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/separator_btn_submit"
             app:layout_constraintBottom_toBottomOf="parent"
             style="@style/Widget.AppCompat.Button.Borderless" />
 

@@ -1,5 +1,6 @@
 package com.zexfer.lufram
 
+import android.animation.LayoutTransition
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
@@ -7,14 +8,15 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.zexfer.lufram.database.LuframDatabase
@@ -25,7 +27,7 @@ import java.util.*
 class WCPreviewFragment : Fragment() {
 
     private var rvRoot: RecyclerView? = null
-    private var textEmptyLibrary: TextView? = null
+    private var frameNothingHere: View? = null
     private var wcListAdapter: WCListAdapter? = null
 
     override fun onCreateView(
@@ -35,16 +37,22 @@ class WCPreviewFragment : Fragment() {
     ): View? =
         inflater.inflate(R.layout.fragment_wallpaper_preview, container, false).also {
             rvRoot = it.findViewById(R.id.rv_root)
-            textEmptyLibrary = it.findViewById(R.id.text_none)
+            frameNothingHere = it.findViewById(R.id.frame_none)
             wcListAdapter = WCListAdapter(inflater)
 
             rvRoot!!.adapter = wcListAdapter
-            (rvRoot!!.layoutManager as GridLayoutManager).spanCount = 2
+            (rvRoot!!.layoutManager as StaggeredGridLayoutManager).spanCount = 2
 
             LuframDatabase.instance
                 .wcDao()
-                .all()
+                .allSorted()
                 .observe(this, Observer<List<WallpaperCollection>> {
+                    if (it.size == 0) {
+                        frameNothingHere!!.visibility = View.VISIBLE
+                    } else {
+                        frameNothingHere!!.visibility = View.GONE
+                    }
+
                     wcListAdapter!!.submitList(ArrayList(it))
                 })
         }
@@ -52,12 +60,14 @@ class WCPreviewFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         rvRoot = null
-        textEmptyLibrary = null
+        frameNothingHere = null
         wcListAdapter = null
     }
 
     class WCListAdapter(private val inflater: LayoutInflater) :
         ListAdapter<WallpaperCollection, ViewHolder>(DIFF_CALLBACK) {
+
+        private var rvs: MutableList<RecyclerView> = mutableListOf()
 
         private var attachCount = 0
         private var animateTimer: Timer? = null
@@ -65,21 +75,30 @@ class WCPreviewFragment : Fragment() {
 
         private val animateStartupListener = object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                val layoutManager = recyclerView.layoutManager
+                if (newState != RecyclerView.SCROLL_STATE_IDLE) {
+                    if (newState == RecyclerView.SCROLL_STATE_DRAGGING)
+                        animateTask.clear()
 
-                if (!(layoutManager is LinearLayoutManager)) {
                     return
                 }
 
-                val startPos = layoutManager.findFirstVisibleItemPosition()
-                val endPos = layoutManager.findLastVisibleItemPosition()
+                val layoutManager = recyclerView.layoutManager as StaggeredGridLayoutManager
 
-                for (i in startPos..endPos) {
-                    animateTask.bind(
-                        recyclerView.findViewHolderForAdapterPosition(i)
-                                as ViewHolder
-                    )
+                val startPositions = IntArray(3).also {
+                    layoutManager.findFirstCompletelyVisibleItemPositions(it)
+                }
+
+                val endPositions = IntArray(3).also {
+                    layoutManager.findLastVisibleItemPositions(it)
+                }
+
+                for (i in 0 until 3) {
+                    for (j in startPositions[i]..endPositions[i]) {
+                        animateTask.bind(
+                            (recyclerView.findViewHolderForAdapterPosition(j)
+                                    as ViewHolder?) ?: continue
+                        )
+                    }
                 }
             }
         }
@@ -92,6 +111,7 @@ class WCPreviewFragment : Fragment() {
                 animateTimer!!.scheduleAtFixedRate(animateTask, 1500, 2500)
             }
 
+            rvs.add(recyclerView)
             recyclerView.addOnScrollListener(animateStartupListener)
         }
 
@@ -109,6 +129,10 @@ class WCPreviewFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.bindTo(getItem(position))
+
+            if (position == 0) {
+                holder.expand()
+            }
         }
 
         override fun onViewAttachedToWindow(holder: ViewHolder) {
@@ -122,6 +146,7 @@ class WCPreviewFragment : Fragment() {
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            rvs.remove(recyclerView)
             recyclerView.removeOnScrollListener(animateStartupListener)
             --attachCount
 
@@ -138,6 +163,9 @@ class WCPreviewFragment : Fragment() {
 
         private val previewPager: ViewPager = rootCardView.findViewById(R.id.image_preview_pager)
         private val nameView: TextView = rootCardView.findViewById(R.id.text_name)
+        private val expansionSection: RelativeLayout = rootCardView.findViewById(R.id.section_more)
+
+        private val btnExpand: AppCompatImageButton = rootCardView.findViewById(R.id.btn_expand)
         private val btnApply: Button = rootCardView.findViewById(R.id.btn_apply)
         private val btnEdit: AppCompatImageButton = rootCardView.findViewById(R.id.btn_edit)
         private val btnDelete: AppCompatImageButton = rootCardView.findViewById(R.id.btn_delete)
@@ -154,6 +182,8 @@ class WCPreviewFragment : Fragment() {
                         setImageBitmap(it)
                     }
 
+                    isClickable = true
+                    setOnClickListener { _ -> openEditor() }
                     adjustViewBounds = true
                     scaleType = ImageView.ScaleType.CENTER_CROP
                     layoutParams = ViewGroup.LayoutParams(
@@ -177,7 +207,12 @@ class WCPreviewFragment : Fragment() {
         }
 
         init {
+            rootCardView.findViewById<LinearLayout>(R.id.content_frame)
+                .layoutTransition
+                .enableTransitionType(LayoutTransition.CHANGING)
+
             previewPager.adapter = previewAdapter
+            btnExpand.setOnClickListener(this)
             btnApply.setOnClickListener(this)
             btnEdit.setOnClickListener(this)
             btnDelete.setOnClickListener(this)
@@ -192,6 +227,20 @@ class WCPreviewFragment : Fragment() {
 
             previewAdapter.notifyDataSetChanged()
             onSharedPreferenceChanged(LuframRepository.luframPrefs, Lufram.PREF_WALLPAPER_ID)
+        }
+
+        fun expand() {
+            if (expansionSection.visibility == View.GONE)
+                onClick(btnExpand)
+        }
+
+        fun openEditor() {
+            Navigation.findNavController(rootCardView)
+                .navigate(
+                    R.id.action_mainFragment_to_WCEditorFragment,
+                    Bundle().apply {
+                        putParcelable("source", boundWallpaper)
+                    })
         }
 
         fun slidePreviewImage() {
@@ -213,6 +262,15 @@ class WCPreviewFragment : Fragment() {
             }
 
             when (view.id) {
+                R.id.btn_expand -> {
+                    expansionSection.visibility = if (expansionSection.visibility == View.GONE)
+                        View.VISIBLE else View.GONE
+                    btnExpand.setImageResource(
+                        if (expansionSection.visibility == View.GONE)
+                            R.drawable.ic_expand_more_black_24dp else
+                            R.drawable.ic_expand_less_black_24dp
+                    )
+                }
                 R.id.btn_apply -> {
                     if (boundWallpaperId != -1) {
                         if (btnApply.text == "Apply") {
@@ -223,12 +281,7 @@ class WCPreviewFragment : Fragment() {
                     }
                 }
                 R.id.btn_edit -> {
-                    Navigation.findNavController(rootCardView)
-                        .navigate(
-                            R.id.action_mainFragment_to_WCEditorFragment,
-                            Bundle().apply {
-                                putParcelable("source", boundWallpaper)
-                            })
+                    openEditor()
                 }
                 R.id.btn_delete -> {
                     LuframRepository.deleteWallpaper(boundWallpaperId)
@@ -288,7 +341,8 @@ class WCPreviewFragment : Fragment() {
                 oldItem: WallpaperCollection,
                 newItem: WallpaperCollection
             ): Boolean {
-                return oldItem == newItem
+                return oldItem.label == newItem.label &&
+                        oldItem.sources.equals(newItem.sources)
             }
         }
     }

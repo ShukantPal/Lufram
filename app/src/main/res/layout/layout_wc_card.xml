@@ -3,48 +3,54 @@
         style="@style/Widget.MaterialComponents.CardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:elevation="3dp">
 
-    <RelativeLayout
+    <LinearLayout
+            android:id="@+id/content_frame"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:orientation="vertical">
 
         <androidx.viewpager.widget.ViewPager
                 android:id="@+id/image_preview_pager"
                 android:layout_width="match_parent"
                 android:layout_height="194dp"
-                android:layout_alignParentTop="true"
                 android:background="@android:color/white"
                 android:elevation="1dp" />
 
-        <TextView
-                android:id="@+id/text_name"
-                style="@style/MaterialAlertDialog.MaterialComponents.Title.Text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@id/btn_expand"
-                android:layout_alignBottom="@id/btn_expand"
-                android:layout_marginStart="16dp"
-                android:gravity="center"
-                android:text="El Niño" />
-
-        <ImageButton
-                android:id="@+id/btn_expand"
-                style="@style/Widget.AppCompat.ActionButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_below="@id/image_preview_pager"
-                android:src="@drawable/ic_expand_more_black_24dp" />
-
-        <RelativeLayout
+        <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/btn_expand"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:id="@+id/text_name"
+                    style="@style/MaterialAlertDialog.MaterialComponents.Title.Text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="El Niño" />
+
+            <ImageButton
+                    android:id="@+id/btn_expand"
+                    style="@style/Widget.AppCompat.ActionButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_expand_more_black_24dp" />
+        </LinearLayout>
+
+        <RelativeLayout
+                android:id="@+id/section_more"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:paddingLeft="8dp"
-                android:paddingRight="8dp">
+                android:paddingRight="8dp"
+                android:visibility="gone">
 
             <View
                     android:id="@+id/divider_expand"
@@ -59,10 +65,10 @@
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
                     android:layout_below="@id/divider_expand"
-                    android:minHeight="0dp"
+                    android:layout_alignParentStart="true"
                     android:minWidth="0dp"
+                    android:minHeight="0dp"
                     android:padding="8dp"
                     android:text="Apply" />
 
@@ -81,13 +87,13 @@
                     style="@style/Widget.AppCompat.ActionButton"
                     android:layout_width="28dp"
                     android:layout_height="0dp"
-                    android:layout_margin="0dp"
                     android:layout_below="@id/divider_expand"
                     android:layout_alignBottom="@id/btn_apply"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
+                    android:layout_margin="0dp"
                     android:foregroundGravity="center"
                     android:src="@drawable/ic_delete_black_24dp" />
         </RelativeLayout>
-    </RelativeLayout>
+    </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -9,6 +9,9 @@ interface WallpaperCollectionDao {
     @Query("SELECT * FROM wallpapercollection")
     fun all(): LiveData<List<WallpaperCollection>>
 
+    @Query("SELECT * FROM wallpapercollection ORDER BY last_updater_id DESC")
+    fun allSorted(): LiveData<List<WallpaperCollection>>
+
     @Query("SELECT * FROM wallpapercollection WHERE id = (:id)")
     fun byId(id: Int): WallpaperCollection
 

@@ -12,16 +12,29 @@
             android:clipToPadding="false"
             android:paddingRight="8dp"
             android:paddingBottom="88dp"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
+            app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager" />
 
-    <TextView
-            android:id="@+id/text_none"
-            style="@style/TextAppearance.AppCompat.Small"
-            android:layout_width="match_parent"
+    <RelativeLayout
+            android:id="@+id/frame_none"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="No wallpapers, let's add some!"
-            android:textStyle="bold"
-            android:visibility="invisible" />
+            android:layout_gravity="center">
+
+        <ImageView
+                android:id="@+id/image_none"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/ic_action_name" />
+
+        <TextView
+                android:id="@+id/text_none"
+                style="@style/TextAppearance.AppCompat.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_below="@id/image_none"
+                android:layout_centerHorizontal="true"
+                android:text="No wallpapers, let's add some!" />
+    </RelativeLayout>
 </FrameLayout>

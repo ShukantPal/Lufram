@@ -20,6 +20,7 @@ import com.zexfer.lufram.database.models.WallpaperCollection
 import com.zexfer.lufram.database.tasks.DeleteWallpaperByIdTask
 import com.zexfer.lufram.database.tasks.DeleteWallpaperTask
 import com.zexfer.lufram.database.tasks.PutWallpaperTask
+import com.zexfer.lufram.database.tasks.UpdateWallpaperTask
 
 object LuframRepository : LifecycleObserver {
 
@@ -102,6 +103,10 @@ object LuframRepository : LifecycleObserver {
                     0
                 )
             )
+
+        UpdateWallpaperTask { it ->
+            it.lastUpdaterId = oldUpdaterId + 1
+        }.execute(wallpaperId)
     }
 
     fun applyWallpaper(wallpaper: WallpaperCollection) {
@@ -144,7 +149,8 @@ object LuframRepository : LifecycleObserver {
     }
 
     fun restartWallpaper() {
-        applyWallpaper(preferredWallpaperId()) // re-writes the alarms!
+        if (preferredWallpaperId() != -1)
+            applyWallpaper(preferredWallpaperId()) // re-writes the alarms!
     }
 
     fun safeStopWallpaper(updaterId: Int, writeUpdaterId: Boolean = true) {

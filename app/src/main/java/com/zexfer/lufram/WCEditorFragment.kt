@@ -103,6 +103,7 @@ class WCEditorFragment :
                         wallpaperUris!!.toTypedArray(),
                         FORMAT_IMAGES,
                         editName!!.text.toString(),
+                        -1,
                         wcId
                     )
 
