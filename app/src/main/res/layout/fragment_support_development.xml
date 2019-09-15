@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".SupportDevelopmentFragment">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:orientation="vertical">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="192dp"
+                android:layout_height="192dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_author" />
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Hi, I'm Shukant Pal"
+                android:textSize="20sp" />
+
+        <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp">
+
+            <LinearLayout style="@style/Lufram.VerticalMenuList">
+
+                <LinearLayout style="@style/sd_entry">
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/about_title_text"
+                                android:text="Cup of ice cream" />
+
+                        <TextView
+                                style="@style/about_subtitle_text"
+                                android:text="I don't drink coffee!" />
+                    </LinearLayout>
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="$0.99"
+                            android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/sd_entry">
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/about_title_text"
+                                android:text="Set of notebooks" />
+
+                        <TextView
+                                style="@style/about_subtitle_text"
+                                android:text="I'm still studying, so" />
+                    </LinearLayout>
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="$4.99"
+                            android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/sd_entry">
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/about_title_text"
+                                android:text="Pizza" />
+
+                        <TextView
+                                style="@style/about_subtitle_text"
+                                android:text="We need to treat ourselves a bit" />
+                    </LinearLayout>
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="$9.99"
+                            android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout style="@style/sd_entry">
+
+                    <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+
+                        <TextView
+                                style="@style/about_title_text"
+                                android:text="Booster Sponsor" />
+
+                        <TextView
+                                style="@style/about_subtitle_text"
+                                android:text="Feeling lucky?" />
+                    </LinearLayout>
+
+                    <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="$39.99"
+                            android:textSize="16sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:elevation="3dp"
+                android:text="Contribute @Patreon"
+                android:textColor="@color/colorError"
+                android:shadowColor="@color/colorError" />
+    </LinearLayout>
+</ScrollView>

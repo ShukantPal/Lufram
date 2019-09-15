@@ -35,7 +35,7 @@ class WCPreviewFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? =
-        inflater.inflate(R.layout.fragment_wallpaper_preview, container, false).also {
+        inflater.inflate(R.layout.fragment_wc_preview, container, false).also {
             rvRoot = it.findViewById(R.id.rv_root)
             frameNothingHere = it.findViewById(R.id.frame_none)
             wcListAdapter = WCListAdapter(inflater)
@@ -43,18 +43,20 @@ class WCPreviewFragment : Fragment() {
             rvRoot!!.adapter = wcListAdapter
             (rvRoot!!.layoutManager as StaggeredGridLayoutManager).spanCount = 2
 
-            LuframDatabase.instance
-                .wcDao()
-                .allSorted()
-                .observe(this, Observer<List<WallpaperCollection>> {
-                    if (it.size == 0) {
-                        frameNothingHere!!.visibility = View.VISIBLE
-                    } else {
-                        frameNothingHere!!.visibility = View.GONE
-                    }
+            if (savedInstanceState === null) {
+                LuframDatabase.instance
+                    .wcDao()
+                    .allSorted()
+                    .observe(this, Observer<List<WallpaperCollection>> {
+                        if (it.size == 0) {
+                            frameNothingHere!!.visibility = View.VISIBLE
+                        } else {
+                            frameNothingHere!!.visibility = View.GONE
+                        }
 
-                    wcListAdapter!!.submitList(ArrayList(it))
-                })
+                        wcListAdapter!!.submitList(ArrayList(it))
+                    })
+            }
         }
 
     override fun onDestroyView() {
@@ -274,7 +276,7 @@ class WCPreviewFragment : Fragment() {
                 R.id.btn_apply -> {
                     if (boundWallpaperId != -1) {
                         if (btnApply.text == "Apply") {
-                            LuframRepository.applyWallpaper(boundWallpaperId)
+                            WallpaperUpdateController.setTargetIdAsync(boundWallpaperId)
                         } else {
                             LuframRepository.stopWallpaper()
                         }

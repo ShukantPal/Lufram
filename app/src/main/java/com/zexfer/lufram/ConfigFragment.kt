@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
+import com.google.android.material.snackbar.Snackbar
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_DAY_RANGE
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_INTERVAL_MILLIS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_RANDOMIZE_ORDER
@@ -70,13 +71,22 @@ class ConfigFragment : Fragment(), View.OnClickListener,
     override fun onPause() {
         super.onPause()
 
+        val configDiff: Boolean
+
         when (mode) {
             MODE_PERIODIC -> {
-                LuframRepository.commitConfig(periodicConfig!!)
+                configDiff = LuframRepository.commitConfig(periodicConfig!!)
             }
             MODE_DYNAMIC -> {
-                LuframRepository.commitConfig(dynamicConfig!!)
+                configDiff = LuframRepository.commitConfig(dynamicConfig!!)
             }
+            else ->
+                return
+        }
+
+        if (configDiff) {
+            Snackbar.make(modePager!!, "We've updated your configuration", Snackbar.LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -112,7 +122,7 @@ class ConfigFragment : Fragment(), View.OnClickListener,
             "${hr} : ${min}"
     }
 
-    fun updateConfigCache() {
+    private fun updateConfigCache() {
         val prefs = LuframRepository.luframPrefs
         mode = prefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC) - CONFIG_PERIODIC
 

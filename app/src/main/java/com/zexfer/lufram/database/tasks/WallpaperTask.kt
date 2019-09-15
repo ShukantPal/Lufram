@@ -10,4 +10,15 @@ abstract class WallpaperTask : AsyncTask<Int, Void, WallpaperCollection>() {
             .wcDao()
             .byId(wp[0] ?: -1)
     }
+
+    companion object {
+        fun run(wp: Int, callback: (WallpaperCollection) -> Unit) {
+            object : WallpaperTask() {
+                override fun onPostExecute(result: WallpaperCollection?) {
+                    if (result !== null)
+                        callback(result)
+                }
+            }.execute(wp)
+        }
+    }
 }

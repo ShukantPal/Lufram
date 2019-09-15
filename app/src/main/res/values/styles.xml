@@ -80,6 +80,18 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="Lufram"></style>
+
+    <style name="Lufram.VerticalMenuList">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:divider">@drawable/divider</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:showDividers">middle</item>
+    </style>
+
     <style name="about_entry">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>

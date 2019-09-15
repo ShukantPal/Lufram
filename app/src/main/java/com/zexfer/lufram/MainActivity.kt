@@ -2,27 +2,36 @@ package com.zexfer.lufram
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
+import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    private var drawer: DrawerLayout? = null
+    private var dlRoot: DrawerLayout? = null
+    private var navController: NavController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.app_bar))
-        drawer = findViewById(R.id.dl_root)
+
+        dlRoot = findViewById(R.id.dl_root)
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment)
+
+        findViewById<NavigationView>(R.id.nav_view)
+            .setNavigationItemSelectedListener(this)
 
         NavigationUI.setupActionBarWithNavController(
             this,
             Navigation.findNavController(findViewById(R.id.nav_host_fragment)),
-            drawer
+            dlRoot
         )
     }
 
@@ -32,9 +41,12 @@ class MainActivity : AppCompatActivity() {
         if (!LuframRepository.isUpdaterAlive()) {
             Snackbar.make(
                 findViewById(android.R.id.content),
-                "Your wallpaper has been killed by the system!", Snackbar.LENGTH_SHORT
+                "Your wallpaper was killed by Android! We've fixed that now :)",
+                Snackbar.LENGTH_SHORT
             )
                 .show()
+
+            LuframRepository.restartWallpaper()
         }
     }
 
@@ -47,17 +59,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (drawer!!.isDrawerOpen(GravityCompat.START)) {
-            drawer!!.closeDrawer(GravityCompat.START)
+        if (dlRoot!!.isDrawerOpen(GravityCompat.START)) {
+            dlRoot!!.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
         }
     }
 
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.option_support_development ->
+                navController!!.navigate(R.id.action_mainFragment_to_supportDevelopmentFragment)
+            R.id.option_about ->
+                navController!!.navigate(R.id.action_mainFragment_to_aboutFragment)
+            else -> return false
+        }
+
+        dlRoot!!.closeDrawer(GravityCompat.START)
+        return true
+    }
+
     override fun onSupportNavigateUp(): Boolean {
         return NavigationUI.navigateUp(
             Navigation.findNavController(this, R.id.nav_host_fragment),
-            drawer
+            dlRoot
         ) || super.onSupportNavigateUp()
     }
 

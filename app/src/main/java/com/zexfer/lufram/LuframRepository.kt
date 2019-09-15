@@ -6,12 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.lifecycle.LifecycleObserver
-import com.zexfer.lufram.Lufram.Companion.EXTRA_UPDATER_ID
 import com.zexfer.lufram.Lufram.Companion.LUFRAM_PREFS
-import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_DAY_RANGE
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_INTERVAL_MILLIS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_RANDOMIZE_ORDER
-import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_TIMEZONE_ADJUSTED_ENABLED
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_TYPE
 import com.zexfer.lufram.Lufram.Companion.PREF_UPDATER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
@@ -20,7 +17,6 @@ import com.zexfer.lufram.database.models.WallpaperCollection
 import com.zexfer.lufram.database.tasks.DeleteWallpaperByIdTask
 import com.zexfer.lufram.database.tasks.DeleteWallpaperTask
 import com.zexfer.lufram.database.tasks.PutWallpaperTask
-import com.zexfer.lufram.database.tasks.UpdateWallpaperTask
 
 object LuframRepository : LifecycleObserver {
 
@@ -45,8 +41,10 @@ object LuframRepository : LifecycleObserver {
         PutWallpaperTask().execute(wallpaper)
     }
 
-    fun commitConfig(config: PeriodicConfig) {
-        val isModeDiff = luframPrefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC) == CONFIG_PERIODIC
+    fun commitConfig(config: PeriodicConfig): Boolean {
+        val isModeDiff = luframPrefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC) != CONFIG_PERIODIC
+        val isIntervalDiff =
+            luframPrefs.getLong(PREF_CONFIG_INTERVAL_MILLIS, 3600000) != config.intervalMillis
         val wasIntervalChanged = (config.intervalMillis != luframPrefs.getLong(
             PREF_CONFIG_INTERVAL_MILLIS, 60000
         ))
@@ -57,60 +55,27 @@ object LuframRepository : LifecycleObserver {
             putBoolean(PREF_CONFIG_RANDOMIZE_ORDER, config.randomizeOrder)
         }.apply()
 
-        if (isModeDiff || wasIntervalChanged)
+        if (isModeDiff || wasIntervalChanged) {
             restartWallpaper() // changing randomize order doesn't need a restart!
+            return true
+        }
+
+        return isIntervalDiff
     }
 
-    fun commitConfig(config: DynamicConfig) {
+    fun commitConfig(config: DynamicConfig): Boolean {
+        val isModeDiff = luframPrefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC) != CONFIG_DYNAMIC
+
         luframPrefs.edit().apply {
             putInt(PREF_CONFIG_TYPE, CONFIG_DYNAMIC)
-            putInt(PREF_CONFIG_DAY_RANGE, config.dayRange)
-            putBoolean(PREF_CONFIG_TIMEZONE_ADJUSTED_ENABLED, config.timeZoneAdjustEnabled)
-        }.apply()
-    }
-
-    /**
-     * Applies the (discrete) wallpaper and activates alarms for switching
-     * through each input.
-     */
-    fun applyWallpaper(wallpaperId: Int) {
-        val oldUpdaterId = luframPrefs.getInt(PREF_UPDATER_ID, 0)
-        val intervalMillis =
-            luframPrefs.getLong(PREF_CONFIG_INTERVAL_MILLIS, 60000) // wallpaper.interval
-
-        stopWallpaper(false)
-
-        luframPrefs.edit().apply {
-            putInt(PREF_WALLPAPER_ID, wallpaperId)
-            putInt(PREF_UPDATER_ID, oldUpdaterId + 1) // stop any previous updaters!
-            putBoolean(PREF_WAS_STOPPED, false)
         }.apply()
 
-        (Lufram.instance.getSystemService(Context.ALARM_SERVICE) as AlarmManager)
-            .setInexactRepeating(
-                AlarmManager.ELAPSED_REALTIME,
-                50,
-                intervalMillis,
-                PendingIntent.getBroadcast(
-                    Lufram.instance,
-                    oldUpdaterId + 1,
-                    Intent(
-                        Lufram.instance,
-                        WallpaperUpdateReceiver::class.java
-                    ).apply {
-                        putExtra(EXTRA_UPDATER_ID, oldUpdaterId + 1)
-                    },
-                    0
-                )
-            )
+        if (isModeDiff) {
+            restartWallpaper()
+            return true
+        }
 
-        UpdateWallpaperTask { it ->
-            it.lastUpdaterId = oldUpdaterId + 1
-        }.execute(wallpaperId)
-    }
-
-    fun applyWallpaper(wallpaper: WallpaperCollection) {
-        applyWallpaper(wallpaper.id!!)
+        return false
     }
 
     /**
@@ -150,7 +115,7 @@ object LuframRepository : LifecycleObserver {
 
     fun restartWallpaper() {
         if (preferredWallpaperId() != -1)
-            applyWallpaper(preferredWallpaperId()) // re-writes the alarms!
+            WallpaperUpdateController.targetId = preferredWallpaperId()
     }
 
     fun safeStopWallpaper(updaterId: Int, writeUpdaterId: Boolean = true) {
@@ -185,6 +150,7 @@ object LuframRepository : LifecycleObserver {
     ) : Config
 
     data class DynamicConfig(
+        // We are not using these fields
         var dayRange: Int,
         var timeZoneAdjustEnabled: Boolean
     ) : Config

@@ -37,6 +37,7 @@ class Lufram : Application() {
         // Custom intent extras used throughout the codebase
         val EXTRA_WALLPAPER = "Result@TargetWallpaper"
         val EXTRA_UPDATER_ID = "Result@UpdaterId"
+        val EXTRA_CONFIG_PREFS = "config_prefs"
 
         // Ids for different wallpaper-preview adapters
 

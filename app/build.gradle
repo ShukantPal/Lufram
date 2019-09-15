@@ -13,8 +13,8 @@ android {
         applicationId "com.zexfer.lufram"
         minSdkVersion 22
         targetSdkVersion 29
-        versionCode 14
-        versionName '1.03.5-internal'
+        versionCode 15
+        versionName '1.03.6.1-internal'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -53,4 +53,5 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:2.1.0-rc01"
     implementation "androidx.preference:preference-ktx:1.1.0"
     implementation 'com.github.michael-rapp:android-material-preferences:5.2.0'
+    implementation 'de.hdodenhof:circleimageview:3.0.1'
 }

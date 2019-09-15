@@ -7,6 +7,7 @@
     <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="10dp"
             android:src="@mipmap/ic_launcher" />
@@ -22,6 +23,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
+            android:layout_marginBottom="16dp"
             android:text="dynamic wallpapers!"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+    <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
 </LinearLayout>

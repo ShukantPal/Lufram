@@ -2,14 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:id="@+id/group_support">
         <item
+                android:id="@+id/option_support_development"
                 android:icon="@drawable/ic_favorite_black_24dp"
                 android:orderInCategory="1"
                 android:title="Support development" />
         <item
+                android:id="@+id/option_settings"
                 android:icon="@drawable/ic_settings_black_24dp"
                 android:orderInCategory="2"
                 android:title="Settings" />
         <item
+                android:id="@+id/option_about"
                 android:icon="@drawable/ic_info_black_24dp"
                 android:orderInCategory="3"
                 android:title="About" />
