@@ -155,6 +155,14 @@ object LuframRepository : LifecycleObserver {
         val min: Int
             get() =
                 ((intervalMillis % 3600000) / 60000).toInt()
+
+        fun formattedIntervalString(): String =
+            String.format("%02d : %02d", hr, min)
+
+        companion object {
+            fun formattedIntervalString(hr: Int, min: Int): String =
+                String.format("%02d : %02d", hr, min)
+        }
     }
 
     data class DynamicConfig(

@@ -36,7 +36,7 @@
                         android:orientation="vertical">
 
                     <TextView
-                            android:text="Interval"
+                            android:text="Interval (hr : min)"
                             style="@style/about_title_text" />
 
                     <TextView

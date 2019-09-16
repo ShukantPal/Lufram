@@ -100,7 +100,7 @@ class ConfigFragment : Fragment(), View.OnClickListener,
         periodicConfig!!.intervalMillis = (1000 * (hr.toLong() * 3600 + min.toLong() * 60))
 
         view!!.findViewById<TextView?>(R.id.text_interval)?.text =
-            "${hr} : ${min}"
+            LuframRepository.PeriodicConfig.formattedIntervalString(hr, min)
     }
 
     private fun updateConfigCache() {
@@ -188,7 +188,7 @@ class ConfigFragment : Fragment(), View.OnClickListener,
 
         fun bindTo(config: LuframRepository.PeriodicConfig) {
             this.configSource = config
-            textInterval.text = "${config.hr} : ${config.min}"
+            textInterval.text = config.formattedIntervalString()
             switchRandomize.isChecked = config.randomizeOrder
         }
 

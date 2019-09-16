@@ -103,6 +103,8 @@
         <item name="android:paddingEnd">8dp</item>
         <item name="android:background">?attr/selectableItemBackground</item>
         <item name="android:clickable">true</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">48dp</item>
     </style>
 
     <style name="sd_entry" parent="about_entry">
