@@ -22,6 +22,7 @@ import com.zexfer.lufram.LuframRepository.CONFIG_PERIODIC
 import com.zexfer.lufram.database.models.WallpaperCollection
 import com.zexfer.lufram.database.tasks.WallpaperTask
 import com.zexfer.lufram.expanders.Expander
+import java.util.*
 
 class WallpaperUpdateReceiver : BroadcastReceiver() {
 
@@ -78,7 +79,8 @@ class WallpaperUpdateReceiver : BroadcastReceiver() {
                         else
                             (Math.random() * expander.size).toInt()
                     } else {
-                        ((System.currentTimeMillis() % INTERVAL_DAY) /
+                        (((System.currentTimeMillis() + TimeZone.getDefault().rawOffset)
+                                % INTERVAL_DAY) /
                                 (INTERVAL_DAY / expander.size)).toInt()
                     }
                 }
