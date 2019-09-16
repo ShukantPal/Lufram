@@ -1,7 +1,6 @@
 package com.zexfer.lufram
 
 import android.app.AlertDialog
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +9,8 @@ import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.viewpager.widget.PagerAdapter
-import androidx.viewpager.widget.ViewPager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_DAY_RANGE
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_INTERVAL_MILLIS
@@ -26,7 +25,7 @@ class ConfigFragment : Fragment(), View.OnClickListener,
     private var entryMode: LinearLayout? = null
     private var textMode: TextView? = null
 
-    private var modePager: ViewPager? = null
+    private var modePager: ViewPager2? = null
 
     private var mode: Int = MODE_PERIODIC
     private var periodicConfig: LuframRepository.PeriodicConfig? = null
@@ -40,24 +39,11 @@ class ConfigFragment : Fragment(), View.OnClickListener,
             entryMode = it.findViewById<LinearLayout>(R.id.cfg_entry_mode)
                 .also { entry -> entry.setOnClickListener(this) }
             textMode = it.findViewById(R.id.text_mode)
-            modePager = it.findViewById<ViewPager>(R.id.mode_pager)
-                .also { pager ->
-                    pager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
-                        override fun onPageScrolled(
-                            position: Int,
-                            positionOffset: Float,
-                            positionOffsetPixels: Int
-                        ) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                pager.releasePointerCapture()
-                            }
-                            pager.currentItem = mode
-                        }
-                    })
-                }
+            modePager = it.findViewById<ViewPager2>(R.id.mode_pager)
+                .apply { isUserInputEnabled = false }
 
             updateConfigCache()
-            modePager!!.adapter = ModeAdapter(this, periodicConfig!!, dynamicConfig!!)
+            modePager!!.adapter = ConfigAdapter(this, periodicConfig!!, dynamicConfig!!)
             modePager!!.currentItem = mode
             textMode!!.text = MODES[mode]
         }
@@ -65,7 +51,7 @@ class ConfigFragment : Fragment(), View.OnClickListener,
     override fun onResume() {
         super.onResume()
         updateConfigCache()
-        (modePager!!.adapter as ModeAdapter).updateConfigs(periodicConfig!!, dynamicConfig!!)
+        (modePager!!.adapter as ConfigAdapter).updateConfigs(periodicConfig!!, dynamicConfig!!)
     }
 
     override fun onPause() {
@@ -88,11 +74,6 @@ class ConfigFragment : Fragment(), View.OnClickListener,
             Snackbar.make(modePager!!, "We've updated your configuration", Snackbar.LENGTH_SHORT)
                 .show()
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        modePager!!.clearOnPageChangeListeners()
     }
 
     override fun onClick(view: View?) {
@@ -137,13 +118,43 @@ class ConfigFragment : Fragment(), View.OnClickListener,
         )
     }
 
-    class ModeAdapter(
+    class ConfigAdapter(
         private val targetFragment: Fragment,
         private var periodicConfig: LuframRepository.PeriodicConfig,
         private var dynamicConfig: LuframRepository.DynamicConfig
-    ) : PagerAdapter() {
-        private var entryInterval: LinearLayout? = null
-        private var entryRandomize: Switch? = null
+    ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+            when (position) {
+                POSITION_PERIODIC -> {
+                    (holder as PeriodicConfigViewHolder).bindTo(periodicConfig)
+                }
+                POSITION_DYNAMIC -> {
+                    (holder as DynamicConfigViewHolder).bindTo(dynamicConfig)
+                }
+            }
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            val layoutRes: Int = when (viewType) {
+                POSITION_PERIODIC -> R.layout.layout_config_periodic
+                POSITION_DYNAMIC -> R.layout.layout_config_dynamic
+                else -> throw IllegalStateException("ConfigAdapter cannot get invalid position!")
+            }
+
+            val rootView = targetFragment
+                .layoutInflater
+                .inflate(layoutRes, parent, false)
+
+            return when (viewType) {
+                POSITION_PERIODIC -> PeriodicConfigViewHolder(targetFragment, rootView)
+                else -> DynamicConfigViewHolder(rootView) // must be exhaustive
+            }
+        }
+
+        override fun getItemCount(): Int = CONFIG_COUNT
+
+        override fun getItemViewType(position: Int): Int = position
 
         fun updateConfigs(
             periodicConfig: LuframRepository.PeriodicConfig,
@@ -153,78 +164,66 @@ class ConfigFragment : Fragment(), View.OnClickListener,
             this.dynamicConfig = dynamicConfig
         }
 
-        override fun instantiateItem(container: ViewGroup, position: Int): Any {
-            when (position) {
-                0 -> {
-                    return targetFragment.layoutInflater.inflate(
-                        R.layout.layout_config_periodic,
-                        container,
-                        false
-                    ).also {
-                        val hr = (periodicConfig.intervalMillis / 3600000).toInt()
-                        val min = ((periodicConfig.intervalMillis % 3600000) / 60000).toInt()
-                        entryInterval = it.findViewById<LinearLayout>(R.id.entry_interval).also {
-                            it.setOnClickListener { view ->
-                                targetFragment.fragmentManager!!.beginTransaction()
-                                    .add(
-                                        SelectIntervalDialogFragment.newInstance(
-                                            hr,
-                                            min
-                                        ).also { frag ->
-                                            frag.setTargetFragment(targetFragment, 1337)
-                                        },
-                                        "SelectIntervalDialogFragment"
-                                    )
-                                    .commit()
-                            }
-                        }
+        companion object {
+            const val POSITION_PERIODIC = 0
+            const val POSITION_DYNAMIC = 1
 
-                        it.findViewById<TextView>(R.id.text_interval).text = "${hr} : ${min}"
+            const val CONFIG_COUNT = 2
+        }
+    }
 
-                        entryRandomize = it.findViewById<Switch>(R.id.entry_randomize).also {
-                            it.setOnClickListener { view ->
-                                periodicConfig.randomizeOrder = entryRandomize!!.isChecked
-                            }
+    // targetFragment must implement SelectIntervalDialogFragment.OnIntervalSelectedListener
+    // and should sync intervals with view R.id.text_interval in onIntervalSelected()
+    class PeriodicConfigViewHolder(private val targetFragment: Fragment, rootView: View) :
+        RecyclerView.ViewHolder(rootView), View.OnClickListener {
 
-                            it.isChecked = periodicConfig.randomizeOrder
-                        }
-                        container.addView(it)
-                    }
-                }
-                1 -> {
-                    return targetFragment.layoutInflater.inflate(
-                        R.layout.layout_config_dynamic,
-                        container,
-                        false
-                    ).also {
-
-                        container.addView(it)
-                    }
-                }
-            }
-
-            return super.instantiateItem(container, position)
+        init {
+            rootView.findViewById<View>(R.id.entry_interval).setOnClickListener(this)
+            rootView.findViewById<View>(R.id.entry_randomize).setOnClickListener(this)
         }
 
-        override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
-            super.destroyItem(container, position, `object`)
+        private val textInterval: TextView = rootView.findViewById(R.id.text_interval)
+        private val switchRandomize: Switch = rootView.findViewById(R.id.switch_randomize)
+        private var configSource: LuframRepository.PeriodicConfig? = null
 
-            when (position) {
-                0 -> {
-                    entryInterval = null
-                    entryRandomize = null
+        fun bindTo(config: LuframRepository.PeriodicConfig) {
+            this.configSource = config
+            textInterval.text = "${config.hr} : ${config.min}"
+            switchRandomize.isChecked = config.randomizeOrder
+        }
+
+        override fun onClick(view: View?) {
+            when (view?.id) {
+                R.id.entry_interval -> {
+                    val hr = configSource!!.hr
+                    val min = configSource!!.min
+
+                    targetFragment.fragmentManager!!.beginTransaction()
+                        .add(
+                            SelectIntervalDialogFragment.newInstance(hr, min).also { frag ->
+                                frag.setTargetFragment(targetFragment, 1337)
+                            },
+                            "SelectIntervalDialogFragment"
+                        )
+                        .commit()
+                }
+                R.id.entry_randomize -> {
+                    switchRandomize.isChecked = !switchRandomize.isChecked
+                    configSource!!.randomizeOrder = switchRandomize.isChecked
                 }
             }
         }
+    }
 
-        override fun isViewFromObject(view: View, `object`: Any) = view === `object`
-
-        override fun getCount() = 2
+    class DynamicConfigViewHolder(rootView: View) : RecyclerView.ViewHolder(rootView) {
+        fun bindTo(config: LuframRepository.DynamicConfig) {
+            // Do nothing! DynamicConfig has no implemented fields!
+        }
     }
 
     companion object {
-        val MODE_PERIODIC = 0
-        val MODE_DYNAMIC = 1
+        const val MODE_PERIODIC = 0
+        const val MODE_DYNAMIC = 1
 
         val MODES = arrayOf("Periodic", "Dynamic")
     }

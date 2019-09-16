@@ -147,7 +147,15 @@ object LuframRepository : LifecycleObserver {
     data class PeriodicConfig(
         var intervalMillis: Long,
         var randomizeOrder: Boolean
-    ) : Config
+    ) : Config {
+        val hr: Int
+            get() =
+                (intervalMillis / 3600000).toInt()
+
+        val min: Int
+            get() =
+                ((intervalMillis % 3600000) / 60000).toInt()
+    }
 
     data class DynamicConfig(
         // We are not using these fields
