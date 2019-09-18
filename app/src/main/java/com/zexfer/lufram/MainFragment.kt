@@ -27,8 +27,9 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
         savedInstanceState: Bundle?
     ): View? =
         inflater.inflate(R.layout.fragment_main, container, false).also {
-            tabsPager = it.findViewById<ViewPager>(R.id.main_pager)
-                .also { pager -> pager.addOnPageChangeListener(this) }
+            tabsPager = it.findViewById<ViewPager>(R.id.main_pager).also { pager ->
+                pager.addOnPageChangeListener(this)
+            }
             fabMain = it.findViewById<FloatingActionButton>(R.id.fab_main)
                 .also { fab -> fab.setOnClickListener(this) }
 

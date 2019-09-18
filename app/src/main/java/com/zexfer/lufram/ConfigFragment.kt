@@ -1,10 +1,12 @@
 package com.zexfer.lufram
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
@@ -25,12 +27,20 @@ class ConfigFragment : Fragment(), View.OnClickListener,
     private var entryMode: LinearLayout? = null
     private var textMode: TextView? = null
 
+    // modePager was supposed to be for displaying different options
+    // for each mode; due to a problem where it still prevents swiping
+    // for the parent ViewPager (MainFragment's tabs) after disabling
+    // user-input, we've invented a solution by manually updating the
+    // view in modeFrame.
     private var modePager: ViewPager2? = null
+    private var modeFrame: FrameLayout? = null
+    private var modeFrameBridge: ConfigAdapterBridge? = null
 
     private var mode: Int = MODE_PERIODIC
     private var periodicConfig: LuframRepository.PeriodicConfig? = null
     private var dynamicConfig: LuframRepository.DynamicConfig? = null
 
+    @SuppressLint("NewApi")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -39,19 +49,27 @@ class ConfigFragment : Fragment(), View.OnClickListener,
             entryMode = it.findViewById<LinearLayout>(R.id.cfg_entry_mode)
                 .also { entry -> entry.setOnClickListener(this) }
             textMode = it.findViewById(R.id.text_mode)
-            modePager = it.findViewById<ViewPager2>(R.id.mode_pager)
-                .apply { isUserInputEnabled = false }
+            modePager = it.findViewById<ViewPager2>(R.id.mode_pager).apply {
+                isUserInputEnabled = false
+            }
+            modeFrame = it.findViewById(R.id.mode_frame)
 
             updateConfigCache()
-            modePager!!.adapter = ConfigAdapter(this, periodicConfig!!, dynamicConfig!!)
-            modePager!!.currentItem = mode
+            //modePager!!.adapter = ConfigAdapter(this, periodicConfig!!, dynamicConfig!!)
+            //modePager!!.currentItem = mode
             textMode!!.text = MODES[mode]
+            modeFrameBridge = ConfigAdapterBridge(
+                ConfigAdapter(this, periodicConfig!!, dynamicConfig!!),
+                modeFrame!!
+            )
+            modeFrameBridge!!.setCurrentItem(mode)
         }
 
     override fun onResume() {
         super.onResume()
         updateConfigCache()
-        (modePager!!.adapter as ConfigAdapter).updateConfigs(periodicConfig!!, dynamicConfig!!)
+        //(modePager!!.adapter as ConfigAdapter).updateConfigs(periodicConfig!!, dynamicConfig!!)
+        modeFrameBridge!!.configAdapter.updateConfigs(periodicConfig!!, dynamicConfig!!)
     }
 
     override fun onPause() {
@@ -86,9 +104,7 @@ class ConfigFragment : Fragment(), View.OnClickListener,
                         arrayOf("Periodic", "Dynamic"),
                         mode
                     ) { dialogInterface, i ->
-                        mode = i
-                        modePager!!.currentItem = mode
-                        textMode!!.text = MODES[mode]
+                        toMode(i)
                         dialogInterface.dismiss()
                     }
                     .show()
@@ -101,6 +117,13 @@ class ConfigFragment : Fragment(), View.OnClickListener,
 
         view!!.findViewById<TextView?>(R.id.text_interval)?.text =
             LuframRepository.PeriodicConfig.formattedIntervalString(hr, min)
+    }
+
+    private fun toMode(value: Int) {
+        mode = value
+        // modePager!!.currentItem = value
+        modeFrameBridge!!.setCurrentItem(mode)
+        textMode!!.text = MODES[mode]
     }
 
     private fun updateConfigCache() {
@@ -118,6 +141,31 @@ class ConfigFragment : Fragment(), View.OnClickListener,
         )
     }
 
+    // Manages switching the view in modeFrame, like what a ViewPager2
+    // would've done! Clunky bloat, yet mighty fix!
+    class ConfigAdapterBridge(
+        val configAdapter: ConfigAdapter,
+        private val frame: FrameLayout
+    ) {
+        private val view: MutableList<View?> = mutableListOf(null, null)// 2 modes, clunky fix
+
+        fun setCurrentItem(i: Int) {
+            if (view[i] === null) {
+                view[i] = configAdapter.onCreateViewHolder(frame, configAdapter.getItemViewType(i))
+                    .also { configAdapter.onBindViewHolder(it, i) }
+                    .itemView
+            }
+
+            frame.removeAllViews()
+            frame.addView(view[i])
+        }
+    }
+
+    // ConfigAdapter was supposed to be used with a ViewPager2. However, the
+    // ViewPager2 will capture swipes and not let the main fragment's ViewPager
+    // get the swipe (even after disabling isUserInputEnabled). Due to this,
+    // we are using a FrameLayout and setting the view manually.
+    // @See ConfigAdapterBridge
     class ConfigAdapter(
         private val targetFragment: Fragment,
         private var periodicConfig: LuframRepository.PeriodicConfig,

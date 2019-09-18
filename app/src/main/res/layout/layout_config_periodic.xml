@@ -20,7 +20,8 @@
 
             <LinearLayout
                     android:id="@+id/entry_interval"
-                    style="@style/about_entry">
+                    style="@style/about_entry"
+                    android:clickable="false">
 
                 <ImageView
                         android:layout_width="wrap_content"

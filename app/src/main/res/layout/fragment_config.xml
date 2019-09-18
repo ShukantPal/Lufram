@@ -122,12 +122,21 @@
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- mode_pager was supposed to be for displaying different
+            modes. However, ViewPager2 has a problem with isUserInputEnabled=false
+            (see ConfigFragment); hence, we are using mode_frame as a solution. !-->
         <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/mode_pager"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="48dp"
+                app:layout_constraintTop_toBottomOf="@id/border_pager" />
+
+        <FrameLayout
+                android:id="@+id/mode_frame"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@id/border_pager" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
