@@ -16,5 +16,4 @@ class SupportDevelopmentFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_support_development, container, false)
     }
 
-
 }

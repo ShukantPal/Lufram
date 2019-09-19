@@ -2,8 +2,13 @@ package com.zexfer.lufram
 
 import android.app.Application
 import android.content.Context
+import com.zexfer.lufram.billing.IabHelper
 
 class Lufram : Application() {
+
+    val iabHelper by lazy {
+        IabHelper(context, BuildConfig.LICENSE_KEY)
+    }
 
     override fun onCreate() {
         super.onCreate()
