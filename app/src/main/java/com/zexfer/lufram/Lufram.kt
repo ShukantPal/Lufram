@@ -2,27 +2,38 @@ package com.zexfer.lufram
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
+import androidx.preference.PreferenceManager
 import com.zexfer.lufram.billing.IabHelper
 
 class Lufram : Application() {
 
-    val iabHelper by lazy {
-        IabHelper(context, BuildConfig.LICENSE_KEY)
-    }
+    lateinit var iabHelper: IabHelper
+    lateinit var defaultPrefs: SharedPreferences
 
     override fun onCreate() {
         super.onCreate()
 
         INSTANCE = this
         CONTEXT = this.applicationContext
+        defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+
+        iabHelper = IabHelper(context, BuildConfig.LICENSE_KEY).apply {
+            startSetup { result ->
+                if (result.isFailure) {
+                    Log.e("Lufram", "iabHelp fail $result")
+                }
+            }
+        }
     }
 
     companion object {
-        private lateinit var INSTANCE: Application
+        private lateinit var INSTANCE: Lufram
         private lateinit var CONTEXT: Context
 
         @JvmStatic
-        val instance: Application
+        val instance: Lufram
             get() {
                 return INSTANCE
             }

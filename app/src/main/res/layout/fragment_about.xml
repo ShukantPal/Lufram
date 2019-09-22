@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".SupportDevelopmentFragment">
+        tools:context=".DonateFragment">
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -83,6 +83,19 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:text="GitHub"
+                            android:textSize="18sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                        android:id="@+id/entry_about_libraries"
+                        style="@style/about_entry">
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="48dp"
+                            android:text="About Libraries"
                             android:textSize="18sp" />
                 </LinearLayout>
             </LinearLayout>

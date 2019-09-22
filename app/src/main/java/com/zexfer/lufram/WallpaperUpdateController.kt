@@ -1,18 +1,23 @@
 package com.zexfer.lufram
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.AlarmManager.INTERVAL_DAY
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.AsyncTask
 import com.zexfer.lufram.Lufram.Companion.LUFRAM_PREFS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_INTERVAL_MILLIS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_TYPE
 import com.zexfer.lufram.Lufram.Companion.PREF_UPDATER_ID
+import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_INDEX
 import com.zexfer.lufram.LuframRepository.CONFIG_DYNAMIC
 import com.zexfer.lufram.LuframRepository.CONFIG_PERIODIC
 import com.zexfer.lufram.LuframRepository.luframPrefs
+import com.zexfer.lufram.LuframRepository.preferredWallpaperId
+import com.zexfer.lufram.database.models.WallpaperCollection
 import com.zexfer.lufram.database.tasks.UpdateWallpaperTask
 import com.zexfer.lufram.database.tasks.WallpaperTask
 import com.zexfer.lufram.expanders.Expander
@@ -102,11 +107,29 @@ object WallpaperUpdateController {
         SetTargetIdTask().execute(value)
     }
 
+    fun estimatedWallpaperIndex(): Int =
+        luframPrefs.getInt(PREF_WALLPAPER_INDEX, 0)
+
+    @SuppressLint("StaticFieldLeak")
+    fun estimatedWallpaperAsync(callback: (Bitmap?) -> Unit) {
+        object : WallpaperTask() {
+            override fun onPostExecute(result: WallpaperCollection?) {
+                if (result == null) {
+                    return
+                }
+
+                val expander = Expander.open(result)
+                val activeIndex: Int = luframPrefs.getInt(PREF_WALLPAPER_INDEX, 0)
+
+                expander.load(Lufram.instance, activeIndex, callback)
+            }
+        }.execute(preferredWallpaperId())
+    }
+
     class SetTargetIdTask : AsyncTask<Int, Void, Void>() {
         override fun doInBackground(vararg idArg: Int?): Void? {
             targetId = idArg[0]!!
             return null
         }
-
     }
 }

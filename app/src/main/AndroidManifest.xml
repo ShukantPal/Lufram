@@ -3,6 +3,7 @@
         package="com.zexfer.lufram">
 
     <uses-permission android:name="com.android.vending.BILLING" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <application
             android:name=".Lufram"

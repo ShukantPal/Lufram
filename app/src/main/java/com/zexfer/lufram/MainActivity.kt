@@ -68,10 +68,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.option_support_development ->
-                navController!!.navigate(R.id.action_mainFragment_to_supportDevelopmentFragment)
             R.id.option_about ->
                 navController!!.navigate(R.id.action_mainFragment_to_aboutFragment)
+            R.id.option_settings ->
+                navController!!.navigate(R.id.action_mainFragment_to_settingsFragment)
+            R.id.option_support_development ->
+                navController!!.navigate(R.id.action_mainFragment_to_donateFragment)
             else -> return false
         }
 

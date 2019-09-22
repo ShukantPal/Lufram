@@ -1,6 +1,5 @@
 package com.zexfer.lufram
 
-
 import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.net.Uri
@@ -10,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.mikepenz.aboutlibraries.Libs
+import com.mikepenz.aboutlibraries.LibsBuilder
 
 class AboutFragment : Fragment(), View.OnClickListener {
 
@@ -19,6 +20,8 @@ class AboutFragment : Fragment(), View.OnClickListener {
     ): View? {
         return inflater.inflate(R.layout.fragment_about, container, false).also {
             it.findViewById<View>(R.id.entry_app_introduction)
+                .setOnClickListener(this)
+            it.findViewById<View>(R.id.entry_about_libraries)
                 .setOnClickListener(this)
             it.findViewById<View>(R.id.entry_github_repo)
                 .setOnClickListener(this)
@@ -39,8 +42,14 @@ class AboutFragment : Fragment(), View.OnClickListener {
         when (view?.id) {
             R.id.entry_github_repo ->
                 uri = Uri.parse("https://github.com/SukantPal/Lufram")
+            R.id.entry_about_libraries -> {
+                LibsBuilder()
+                    .withActivityStyle(Libs.ActivityStyle.LIGHT)
+                    .start(context!!)
+                    .also { return }
+            }
             R.id.entry_donate -> {
-                findNavController().navigate(R.id.action_aboutFragment_to_supportDevelopmentFragment)
+                findNavController().navigate(R.id.action_aboutFragment_to_donateFragment)
                     .also { return }
             }
             R.id.entry_report_bug ->

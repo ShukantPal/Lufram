@@ -13,7 +13,7 @@
     <color name="colorError">#b00020</color>
     <color name="colorOnError">#ffffff</color>
 
-    <color name="colorBackground">#fafafa</color>
+    <color name="colorBackground">#f9f9f9</color>
 
     <color name="colorAccent">#1a1a1a</color>
     <color name="colorAccentLight">#ffffee</color>

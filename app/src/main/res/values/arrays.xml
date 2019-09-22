@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="library_layout_options">
+        <item>Cards</item>
+        <item>List</item>
+        <item>Grid</item>
+    </string-array>
+</resources>

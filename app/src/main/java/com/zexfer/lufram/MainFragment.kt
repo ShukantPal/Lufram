@@ -1,13 +1,12 @@
 package com.zexfer.lufram
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -36,7 +35,13 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
             tabsPager!!.adapter = MainTabsAdapter(childFragmentManager)
             tabsPager!!.currentItem = 1
             fabShown = true
+
+            setHasOptionsMenu(true)
         }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.main_toolbar, menu)
+    }
 
     override fun onStart() {
         super.onStart()
@@ -67,6 +72,22 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
                 }
             }
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.option_timeline -> {
+                findNavController().navigate(
+                    R.id.action_mainFragment_to_timelineFragment,
+                    Bundle().apply {
+                        putInt("id", LuframRepository.preferredWallpaperId())
+                    }
+                )
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+
+        return true
     }
 
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {

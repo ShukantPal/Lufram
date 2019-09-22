@@ -2,21 +2,25 @@ package com.zexfer.lufram
 
 import android.animation.LayoutTransition
 import android.content.SharedPreferences
+import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.AppCompatImageButton
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.*
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.zexfer.lufram.database.LuframDatabase
@@ -41,7 +45,31 @@ class WCPreviewFragment : Fragment() {
             wcListAdapter = WCListAdapter(inflater)
 
             rvRoot!!.adapter = wcListAdapter
-            (rvRoot!!.layoutManager as StaggeredGridLayoutManager).spanCount = 2
+            rvRoot!!.isVerticalScrollBarEnabled = false
+            if (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid") == "List") {
+                rvRoot!!.setPadding(0, 0, 0, 240)
+            }
+
+            when (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid")) {
+                "Cards", "List" -> rvRoot!!.layoutManager = LinearLayoutManager(context)
+                "Grid" -> rvRoot!!.layoutManager = StaggeredGridLayoutManager(2, VERTICAL)
+            }
+
+            WallpaperUpdateController.estimatedWallpaperAsync { wp ->
+                if (wp === null) {
+                    return@estimatedWallpaperAsync
+                }
+
+                val blurredWp = Bitmap.createBitmap(wp.width, wp.height, Bitmap.Config.ARGB_8888)
+                val paint = Paint()
+                paint.colorFilter =
+                    PorterDuffColorFilter(0xeeffffff.toInt(), PorterDuff.Mode.SRC_OVER)
+
+                Canvas(blurredWp).drawBitmap(wp, 0.toFloat(), 0.toFloat(), paint)
+
+                it.background = BitmapDrawable(resources, blurredWp)
+                Log.d("Lufram", " setwp")
+            }
 
             if (savedInstanceState === null) {
                 LuframDatabase.instance
@@ -84,22 +112,34 @@ class WCPreviewFragment : Fragment() {
                     return
                 }
 
-                val layoutManager = recyclerView.layoutManager as StaggeredGridLayoutManager
+                val layoutManager = recyclerView.layoutManager
 
-                val startPositions = IntArray(3).also {
-                    layoutManager.findFirstCompletelyVisibleItemPositions(it)
-                }
+                if (layoutManager is LinearLayoutManager) {
+                    val startPosition = layoutManager.findFirstVisibleItemPosition()
+                    val endPosition = layoutManager.findLastVisibleItemPosition()
 
-                val endPositions = IntArray(3).also {
-                    layoutManager.findLastVisibleItemPositions(it)
-                }
-
-                for (i in 0 until 3) {
-                    for (j in startPositions[i]..endPositions[i]) {
+                    for (i in startPosition..endPosition) {
                         animateTask.bind(
-                            (recyclerView.findViewHolderForAdapterPosition(j)
-                                    as ViewHolder?) ?: continue
+                            (recyclerView.findViewHolderForAdapterPosition(i) as ViewHolder?)
+                                ?: continue
                         )
+                    }
+                } else if (layoutManager is StaggeredGridLayoutManager) {
+                    val startPositions = IntArray(3).also {
+                        layoutManager.findFirstCompletelyVisibleItemPositions(it)
+                    }
+
+                    val endPositions = IntArray(3).also {
+                        layoutManager.findLastVisibleItemPositions(it)
+                    }
+
+                    for (i in 0 until 3) {
+                        for (j in startPositions[i]..endPositions[i]) {
+                            animateTask.bind(
+                                (recyclerView.findViewHolderForAdapterPosition(j)
+                                        as ViewHolder?) ?: continue
+                            )
+                        }
                     }
                 }
             }
@@ -126,7 +166,7 @@ class WCPreviewFragment : Fragment() {
                     R.layout.layout_wc_card,
                     parent,
                     false
-                )
+                ) as CardView
             )
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -160,7 +200,7 @@ class WCPreviewFragment : Fragment() {
         }
     }
 
-    class ViewHolder(private val rootCardView: View) : RecyclerView.ViewHolder(rootCardView),
+    class ViewHolder(private val rootCardView: CardView) : RecyclerView.ViewHolder(rootCardView),
         SharedPreferences.OnSharedPreferenceChangeListener, View.OnClickListener {
 
         private val previewPager: ViewPager = rootCardView.findViewById(R.id.image_preview_pager)
@@ -176,6 +216,23 @@ class WCPreviewFragment : Fragment() {
         private var imageExpander: Expander? = null
         private var boundWallpaper: WallpaperCollection? = null
         private var boundWallpaperId: Int = -1
+
+        init {
+            when (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid")) {
+                "List" -> {
+                    rootCardView.cardElevation = 0.toFloat()
+                    rootCardView.radius = 0.toFloat()
+                    (rootCardView.layoutParams as ViewGroup.MarginLayoutParams).let {
+                        it.marginStart = 0
+                        it.topMargin = TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_PX,
+                            16.toFloat(),
+                            Lufram.instance.resources.displayMetrics
+                        ).toInt()
+                    }
+                }
+            }
+        }
 
         private val previewAdapter = object : PagerAdapter() {
             override fun instantiateItem(container: ViewGroup, position: Int): Any {

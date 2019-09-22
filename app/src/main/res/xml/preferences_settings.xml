@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+            android:key="layout"
+            android:title="Choose Layout">
+        <ListPreference
+                android:key="preview_layout"
+                android:title="Library Layout"
+                android:summary="%s"
+                android:entries="@array/library_layout_options"
+                android:entryValues="@array/library_layout_options"
+                android:defaultValue="Grid" />
+    </PreferenceCategory>
+</PreferenceScreen>

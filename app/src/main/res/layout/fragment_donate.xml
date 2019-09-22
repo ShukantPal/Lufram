@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".SupportDevelopmentFragment">
+        tools:context=".DonateFragment">
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -36,7 +36,9 @@
 
             <LinearLayout style="@style/Lufram.VerticalMenuList">
 
-                <LinearLayout style="@style/sd_entry">
+                <LinearLayout
+                        android:id="@+id/entry_donate_small"
+                        style="@style/sd_entry">
 
                     <LinearLayout
                             android:layout_width="0dp"
@@ -61,7 +63,9 @@
                             android:textSize="16sp" />
                 </LinearLayout>
 
-                <LinearLayout style="@style/sd_entry">
+                <LinearLayout
+                        android:id="@+id/entry_donate"
+                        style="@style/sd_entry">
 
                     <LinearLayout
                             android:layout_width="0dp"
@@ -86,7 +90,9 @@
                             android:textSize="16sp" />
                 </LinearLayout>
 
-                <LinearLayout style="@style/sd_entry">
+                <LinearLayout
+                        android:id="@+id/entry_donate_medium"
+                        style="@style/sd_entry">
 
                     <LinearLayout
                             android:layout_width="0dp"
@@ -111,7 +117,9 @@
                             android:textSize="16sp" />
                 </LinearLayout>
 
-                <LinearLayout style="@style/sd_entry">
+                <LinearLayout
+                        android:id="@+id/entry_donate_large"
+                        style="@style/sd_entry">
 
                     <LinearLayout
                             android:layout_width="0dp"
@@ -139,11 +147,12 @@
         </androidx.cardview.widget.CardView>
 
         <Button
+                android:id="@+id/button_patreon_profile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:elevation="3dp"
-                android:text="Contribute @Patreon"
+                android:text="My Patreon Profile"
                 android:textColor="@color/colorError"
                 android:shadowColor="@color/colorError" />
     </LinearLayout>
