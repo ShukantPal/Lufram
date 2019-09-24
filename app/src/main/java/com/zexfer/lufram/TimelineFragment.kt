@@ -35,19 +35,13 @@ class TimelineFragment : Fragment(), View.OnClickListener {
             WallpaperTask.run(arguments!!.getInt(ARG_ID)) { wc ->
                 wcPager?.adapter = WallpaperPreviewAdapter(
                     context ?: return@run,
-                    Expander.open(wc)
+                    Expander.open(wc),
+                    WallpaperUpdateController.estimatedWallpaperIndex()
                 )
 
                 wcPager?.pageMargin = 16
                 wcPager?.setPageTransformer(false, CarouselEffectTransformer(context!!))
                 wcPager?.isHorizontalScrollBarEnabled = true
-
-                wcPager?.postDelayed({
-                    wcPager?.setCurrentItem(
-                        WallpaperUpdateController.estimatedWallpaperIndex(),
-                        true
-                    )
-                }, 100)
             }
         }
 

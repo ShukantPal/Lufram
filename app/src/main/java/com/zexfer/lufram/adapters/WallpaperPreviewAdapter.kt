@@ -9,12 +9,19 @@ import com.zexfer.lufram.expanders.Expander
 
 class WallpaperPreviewAdapter(
     private val context: Context,
-    private val expander: Expander
+    private val expander: Expander,
+    val initialBase: Int = 0
 ) : PagerAdapter() {
+
+    var base: Int = initialBase
+        set(value) {
+            field = value
+            this.notifyDataSetChanged()
+        }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         return ImageView(context).apply {
-            expander.load(context, position) {
+            expander.load(context, (position + base) % expander.size) {
                 setImageBitmap(it)
             }
 
