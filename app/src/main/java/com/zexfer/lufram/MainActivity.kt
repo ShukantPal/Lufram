@@ -7,12 +7,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(),
+    NavigationView.OnNavigationItemSelectedListener,
+    NavController.OnDestinationChangedListener {
 
     private var dlRoot: DrawerLayout? = null
     private var navController: NavController? = null
@@ -37,6 +40,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onStart() {
         super.onStart()
+        navController!!.addOnDestinationChangedListener(this)
 
         if (!LuframRepository.isUpdaterAlive()) {
             Snackbar.make(
@@ -48,6 +52,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             LuframRepository.restartWallpaper()
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        navController!!.removeOnDestinationChangedListener(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -63,6 +72,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             dlRoot!!.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
+        }
+    }
+
+    override fun onDestinationChanged(
+        controller: NavController,
+        destination: NavDestination,
+        arguments: Bundle?
+    ) {
+        if (destination.id != R.id.mainFragment) {
+            dlRoot!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.START)
+        } else {
+            dlRoot!!.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.START)
         }
     }
 
