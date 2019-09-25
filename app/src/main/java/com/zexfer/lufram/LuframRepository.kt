@@ -11,6 +11,7 @@ import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_INTERVAL_MILLIS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_RANDOMIZE_ORDER
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_TYPE
 import com.zexfer.lufram.Lufram.Companion.PREF_UPDATER_ID
+import com.zexfer.lufram.Lufram.Companion.PREF_UPDATER_TIMESTAMP
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WAS_STOPPED
 import com.zexfer.lufram.database.models.WallpaperCollection
@@ -24,6 +25,18 @@ object LuframRepository : LifecycleObserver {
 
     fun preferredWallpaperId() =
         luframPrefs.getInt(PREF_WALLPAPER_ID, -1)
+
+    val configMode: Int
+        get() = luframPrefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC)
+
+    val updateIntervalMillis: Long
+        get() = luframPrefs.getLong(PREF_CONFIG_INTERVAL_MILLIS, 0)
+
+    val lastUpdateId: Int
+        get() = luframPrefs.getInt(PREF_UPDATER_ID, -1)
+
+    val lastUpdateTimestamp: Long
+        get() = luframPrefs.getLong(PREF_UPDATER_TIMESTAMP, 0)
 
     fun deleteWallpaper(wallpaper: WallpaperCollection) {
         if (preferredWallpaperId() == wallpaper.id)
