@@ -68,6 +68,7 @@ class Lufram : Application() {
         val PREF_WAS_STOPPED = "was_stopped" // if wallpaper was stopped by user
         val PREF_UPDATER_ID =
             "UpdaterId@PreferredWallpaper" // incremented each time preferred wallpaper changes, so old updaters stop
+        val PREF_UPDATER_TIMESTAMP = "Updater_Timestamp"
 
         val PREF_CONFIG_TYPE = "cfg_type"
         val PREF_CONFIG_INTERVAL_MILLIS = "cfg_interval_millis"

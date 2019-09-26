@@ -14,4 +14,8 @@
         switches wallpapers after specific intervals. The new dynamic mode
         will set wallpapers based on the time or sun\'s position.
     </string>
+
+    <string name="whats_this_timeline_options">
+        This estimates when a wallpaper will be set.
+    </string>
 </resources>

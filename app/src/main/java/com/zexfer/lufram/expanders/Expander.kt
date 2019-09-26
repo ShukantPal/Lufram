@@ -9,7 +9,7 @@ import java.util.concurrent.Future
 interface Expander {
     val size: Int
 
-    fun load(context: Context, index: Int, callback: ((Bitmap) -> Unit)?): Future<Bitmap>
+    fun load(context: Context, index: Int, callback: ((Bitmap) -> Unit)? = null): Future<Bitmap>
 
     /**
      * Should delete any null wallpapers (as returned by load())

@@ -16,6 +16,7 @@ import com.zexfer.lufram.Lufram.Companion.LUFRAM_PREFS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_RANDOMIZE_ORDER
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_TYPE
 import com.zexfer.lufram.Lufram.Companion.PREF_UPDATER_ID
+import com.zexfer.lufram.Lufram.Companion.PREF_UPDATER_TIMESTAMP
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_INDEX
 import com.zexfer.lufram.LuframRepository.CONFIG_PERIODIC
@@ -108,6 +109,7 @@ class WallpaperUpdateReceiver : BroadcastReceiver() {
             if (!rerunTask) {
                 luframPrefs.edit().apply {
                     putInt(PREF_WALLPAPER_INDEX, newOffset)
+                    putLong(PREF_UPDATER_TIMESTAMP, System.currentTimeMillis())
                 }.apply()
             } else if (recurseCount < 25) {// something is wrong if 25 nulls occur!
                 ++recurseCount

@@ -6,6 +6,7 @@
         android:id="@+id/dl_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:popupTheme="@style/LuframTheme.PreferenceDialog"
         tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout

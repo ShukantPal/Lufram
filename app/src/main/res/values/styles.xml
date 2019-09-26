@@ -46,6 +46,7 @@
     <style name="LuframTheme.PreferenceDialog" parent="MaterialDialog.Light">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorSecondary</item>
+        <item name="android:textColorPrimary">@color/colorOnPrimary</item>
     </style>
 
     <style name="LuframTheme.Preference" parent="Widget.MaterialComponents.CardView">
