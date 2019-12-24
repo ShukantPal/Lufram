@@ -4,11 +4,12 @@
             android:key="layout"
             android:title="Choose Layout">
         <ListPreference
-                android:key="preview_layout"
-                android:title="Library Layout"
-                android:summary="%s"
+                android:defaultValue="Grid"
                 android:entries="@array/library_layout_options"
                 android:entryValues="@array/library_layout_options"
-                android:defaultValue="Grid" />
+                android:icon="@drawable/ic_layout_black_24dp_89op"
+                android:key="preview_layout"
+                android:summary="%s"
+                android:title="Library Layout" />
     </PreferenceCategory>
 </PreferenceScreen>

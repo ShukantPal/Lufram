@@ -47,7 +47,7 @@
     <fragment
             android:id="@+id/settingsFragment"
             android:name="com.zexfer.lufram.SettingsFragment"
-            android:label="SettingsFragment" />
+            android:label="Settings" />
     <fragment
             android:id="@+id/timelineFragment"
             android:name="com.zexfer.lufram.TimelineFragment"

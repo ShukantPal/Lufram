@@ -2,29 +2,23 @@ package com.zexfer.lufram
 
 import android.animation.LayoutTransition
 import android.content.SharedPreferences
-import android.graphics.*
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.appcompat.widget.AppCompatImageButton
-import androidx.cardview.widget.CardView
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.*
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
-import androidx.viewpager.widget.PagerAdapter
-import androidx.viewpager.widget.ViewPager
+import com.zexfer.lufram.Lufram.Companion.context
+import com.zexfer.lufram.adapters.WallpaperPreviewAdapter
 import com.zexfer.lufram.database.LuframDatabase
 import com.zexfer.lufram.database.models.WallpaperCollection
+import com.zexfer.lufram.databinding.LayoutWallpaperPreviewCardBinding
 import com.zexfer.lufram.expanders.Expander
 import java.util.*
 
@@ -53,22 +47,6 @@ class WCPreviewFragment : Fragment() {
             when (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid")) {
                 "Cards", "List" -> rvRoot!!.layoutManager = LinearLayoutManager(context)
                 "Grid" -> rvRoot!!.layoutManager = StaggeredGridLayoutManager(2, VERTICAL)
-            }
-
-            WallpaperUpdateController.estimatedWallpaperAsync { wp ->
-                if (wp === null) {
-                    return@estimatedWallpaperAsync
-                }
-
-                val blurredWp = Bitmap.createBitmap(wp.width, wp.height, Bitmap.Config.ARGB_8888)
-                val paint = Paint()
-                paint.colorFilter =
-                    PorterDuffColorFilter(0xeeffffff.toInt(), PorterDuff.Mode.SRC_OVER)
-
-                Canvas(blurredWp).drawBitmap(wp, 0.toFloat(), 0.toFloat(), paint)
-
-                it.background = BitmapDrawable(resources, blurredWp)
-                Log.d("Lufram", " setwp")
             }
 
             if (savedInstanceState === null) {
@@ -160,14 +138,16 @@ class WCPreviewFragment : Fragment() {
         override fun onCreateViewHolder(
             parent: ViewGroup,
             viewType: Int
-        ): ViewHolder =
-            ViewHolder(
-                inflater.inflate(
-                    R.layout.layout_wc_card,
+        ): ViewHolder {
+            return ViewHolder(
+                DataBindingUtil.inflate(
+                    inflater,
+                    R.layout.layout_wallpaper_preview_card,
                     parent,
                     false
-                ) as CardView
+                )
             )
+        }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.bindTo(getItem(position))
@@ -200,101 +180,66 @@ class WCPreviewFragment : Fragment() {
         }
     }
 
-    class ViewHolder(private val rootCardView: CardView) : RecyclerView.ViewHolder(rootCardView),
-        SharedPreferences.OnSharedPreferenceChangeListener, View.OnClickListener {
-
-        private val previewPager: ViewPager = rootCardView.findViewById(R.id.image_preview_pager)
-        private val nameView: TextView = rootCardView.findViewById(R.id.text_name)
-        private val expansionSection: RelativeLayout = rootCardView.findViewById(R.id.section_more)
-
-        private val btnExpand: AppCompatImageButton = rootCardView.findViewById(R.id.btn_expand)
-        private val btnApply: Button = rootCardView.findViewById(R.id.btn_apply)
-        private val btnEdit: AppCompatImageButton = rootCardView.findViewById(R.id.btn_edit)
-        private val btnDelete: AppCompatImageButton = rootCardView.findViewById(R.id.btn_delete)
+    class ViewHolder(private val viewBinding: LayoutWallpaperPreviewCardBinding) :
+        RecyclerView.ViewHolder(viewBinding.root),
+        SharedPreferences.OnSharedPreferenceChangeListener,
+        View.OnClickListener {
 
         private var shownPreviewImageIndex: Int = 0
         private var imageExpander: Expander? = null
         private var boundWallpaper: WallpaperCollection? = null
         private var boundWallpaperId: Int = -1
 
-        init {
-            when (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid")) {
-                "List" -> {
-                    rootCardView.cardElevation = 0.toFloat()
-                    rootCardView.radius = 0.toFloat()
-                    (rootCardView.layoutParams as ViewGroup.MarginLayoutParams).let {
-                        it.marginStart = 0
-                        it.topMargin = TypedValue.applyDimension(
-                            TypedValue.COMPLEX_UNIT_PX,
-                            16.toFloat(),
-                            Lufram.instance.resources.displayMetrics
-                        ).toInt()
-                    }
-                }
-            }
-        }
-
-        private val previewAdapter = object : PagerAdapter() {
-            override fun instantiateItem(container: ViewGroup, position: Int): Any {
-                return ImageView(rootCardView.context).apply {
-                    imageExpander!!.load(context, position) {
-                        setImageBitmap(it)
-                    }
-
-                    isClickable = true
-                    setOnClickListener { _ -> openEditor() }
-                    adjustViewBounds = true
-                    scaleType = ImageView.ScaleType.CENTER_CROP
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                }.also {
-                    container.addView(it)
-                }
-            }
-
-            override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
-                container.removeView(`object` as View)
-            }
-
-            override fun isViewFromObject(view: View, `object`: Any): Boolean =
-                view === `object`
-
-            override fun getCount(): Int =
-                imageExpander?.size ?: 0
-        }
+        private val previewImageClickListener: View.OnClickListener =
+            View.OnClickListener { openEditor() }
 
         init {
-            rootCardView.findViewById<LinearLayout>(R.id.content_frame)
+            viewBinding.clickListener = this
+
+            // Smooth animations when the WallpaperCollectionDao is modified
+            viewBinding.contentFrame
                 .layoutTransition
                 .enableTransitionType(LayoutTransition.CHANGING)
 
-            previewPager.adapter = previewAdapter
-            btnExpand.setOnClickListener(this)
-            btnApply.setOnClickListener(this)
-            btnEdit.setOnClickListener(this)
-            btnDelete.setOnClickListener(this)
+            // Apply layout style based on user's layout setting.
+            when (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid")) {
+                "List" -> {
+                    viewBinding.parentCard.apply {
+                        radius = 0f
+
+                        (layoutParams as ViewGroup.MarginLayoutParams).apply {
+                            marginStart = 0
+                            topMargin *= 2 // 8dp to 16dp, no computation
+                        }
+                    }
+                }
+            }
         }
 
         fun bindTo(wallpaper: WallpaperCollection) {
-            nameView.text = wallpaper.label
+            viewBinding.textName.text = wallpaper.label
             boundWallpaper = wallpaper
             boundWallpaperId = wallpaper.id!!
             shownPreviewImageIndex = 0
             imageExpander = Expander.open(wallpaper)
 
-            previewAdapter.notifyDataSetChanged()
+            viewBinding.imagePreviewPager.adapter = WallpaperPreviewAdapter(
+                context,
+                imageExpander!!,
+                0,
+                previewImageClickListener
+            )
+
             onSharedPreferenceChanged(LuframRepository.luframPrefs, Lufram.PREF_WALLPAPER_ID)
         }
 
         fun expand() {
-            if (expansionSection.visibility == View.GONE)
-                onClick(btnExpand)
+            if (viewBinding.expansionLayout.visibility == View.GONE)
+                onClick(viewBinding.descriptionBar)
         }
 
         fun openEditor() {
-            Navigation.findNavController(rootCardView)
+            Navigation.findNavController(viewBinding.root)
                 .navigate(
                     R.id.action_mainFragment_to_WCEditorFragment,
                     Bundle().apply {
@@ -304,14 +249,14 @@ class WCPreviewFragment : Fragment() {
 
         fun slidePreviewImage() {
             Handler(Looper.getMainLooper()).post {
-                if (shownPreviewImageIndex != previewPager.currentItem) {
-                    shownPreviewImageIndex = previewPager.currentItem
+                if (shownPreviewImageIndex != viewBinding.imagePreviewPager.currentItem) {
+                    shownPreviewImageIndex = viewBinding.imagePreviewPager.currentItem
                     return@post // give the user a little more time!
                 }
 
                 shownPreviewImageIndex =
                     (shownPreviewImageIndex + 1) % imageExpander!!.size
-                previewPager.setCurrentItem(shownPreviewImageIndex, true)
+                viewBinding.imagePreviewPager.setCurrentItem(shownPreviewImageIndex, true)
             }
         }
 
@@ -321,18 +266,19 @@ class WCPreviewFragment : Fragment() {
             }
 
             when (view.id) {
-                R.id.btn_expand -> {
-                    expansionSection.visibility = if (expansionSection.visibility == View.GONE)
-                        View.VISIBLE else View.GONE
-                    btnExpand.setImageResource(
-                        if (expansionSection.visibility == View.GONE)
+                R.id.description_bar -> {
+                    viewBinding.expansionLayout.visibility =
+                        if (viewBinding.expansionLayout.visibility == View.GONE)
+                            View.VISIBLE else View.GONE
+                    viewBinding.btnExpand.setImageResource(
+                        if (viewBinding.expansionLayout.visibility == View.GONE)
                             R.drawable.ic_expand_more_black_24dp else
                             R.drawable.ic_expand_less_black_24dp
                     )
                 }
                 R.id.btn_apply -> {
                     if (boundWallpaperId != -1) {
-                        if (btnApply.text == "Apply") {
+                        if (viewBinding.btnApply.text == "Apply") {
                             WallpaperUpdateController.setTargetIdAsync(boundWallpaperId)
                         } else {
                             LuframRepository.stopWallpaper()
@@ -356,9 +302,9 @@ class WCPreviewFragment : Fragment() {
                 return
 
             if (luframPrefs?.getInt(changedPref, -2) == boundWallpaperId) {
-                btnApply.text = "Stop"
+                viewBinding.btnApply.text = "Stop"
             } else {
-                btnApply.text = "Apply"
+                viewBinding.btnApply.text = "Apply"
             }
         }
     }

@@ -13,6 +13,8 @@
     <color name="colorError">#b00020</color>
     <color name="colorOnError">#ffffff</color>
 
+    <color name="colorTransparent">#00000000</color>
+
     <color name="colorBackground">@android:color/background_light</color>
 
     <color name="colorAccent">#1a1a1a</color>

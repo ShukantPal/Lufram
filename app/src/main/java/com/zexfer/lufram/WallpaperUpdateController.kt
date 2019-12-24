@@ -12,22 +12,27 @@ import com.zexfer.lufram.Lufram.Companion.LUFRAM_PREFS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_INTERVAL_MILLIS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_TYPE
 import com.zexfer.lufram.Lufram.Companion.PREF_UPDATER_ID
+import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_INDEX
+import com.zexfer.lufram.Lufram.Companion.PREF_WAS_STOPPED
 import com.zexfer.lufram.LuframRepository.CONFIG_DYNAMIC
 import com.zexfer.lufram.LuframRepository.CONFIG_PERIODIC
 import com.zexfer.lufram.LuframRepository.luframPrefs
 import com.zexfer.lufram.LuframRepository.preferredWallpaperId
+import com.zexfer.lufram.database.LuframDatabase
 import com.zexfer.lufram.database.models.WallpaperCollection
 import com.zexfer.lufram.database.tasks.UpdateWallpaperTask
 import com.zexfer.lufram.database.tasks.WallpaperTask
 import com.zexfer.lufram.expanders.Expander
+import java.util.concurrent.Future
+import java.util.concurrent.FutureTask
 
 object WallpaperUpdateController {
 
     var targetId: Int = -2
         get() {
             if (field == -2) {
-                field = LuframRepository.preferredWallpaperId()
+                field = preferredWallpaperId()
             }
 
             return field
@@ -55,9 +60,10 @@ object WallpaperUpdateController {
 
             // Save updater-config to preferences
             luframPrefs.edit().apply {
-                putInt(Lufram.PREF_WALLPAPER_ID, value)
+                putInt(PREF_WALLPAPER_INDEX, 0)
+                putInt(PREF_WALLPAPER_ID, value)
                 putInt(PREF_UPDATER_ID, oldUpdaterId + 1) // stop any previous updaters!
-                putBoolean(Lufram.PREF_WAS_STOPPED, false)
+                putBoolean(PREF_WAS_STOPPED, false)
             }.apply()
 
             val alarmManager =
@@ -109,6 +115,23 @@ object WallpaperUpdateController {
 
     fun estimatedWallpaperIndex(): Int =
         luframPrefs.getInt(PREF_WALLPAPER_INDEX, 0)
+
+    fun estimatedWallpaperAsync(): Future<Bitmap> =
+        FutureTask<Bitmap> {
+            val wallpaperCollection =
+                LuframDatabase.instance
+                    .wcDao()
+                    .byId(preferredWallpaperId())
+
+            val expander = Expander.open(wallpaperCollection)
+            val activeIndex = estimatedWallpaperIndex()
+
+            expander.load(Lufram.instance, activeIndex).get()
+        }.also {
+            Lufram.instance
+                .wallpaperTaskExecutor
+                .execute(it)
+        }
 
     @SuppressLint("StaticFieldLeak")
     fun estimatedWallpaperAsync(callback: (Bitmap?) -> Unit) {

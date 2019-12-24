@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <variable
+                name="clickListener"
+                type="com.zexfer.lufram.WCPreviewFragment.ViewHolder" />
+
+        <variable
+                name="wallpaperPreviewAdapter"
+                type="androidx.viewpager.widget.PagerAdapter" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/parentCard"
+            style="@style/WallpaperPreviewCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/colorSurface"
+            app:cardElevation="2dp">
+
+        <LinearLayout
+                android:id="@+id/content_frame"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
+                android:orientation="vertical">
+
+            <androidx.viewpager.widget.ViewPager
+                    android:id="@+id/image_preview_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="194dp"
+                    android:background="@android:color/white"
+                    android:elevation="1dp" />
+
+            <LinearLayout
+                    android:id="@+id/description_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:onClick="@{clickListener::onClick}"
+                    android:orientation="horizontal"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
+
+                <TextView
+                        android:id="@+id/text_name"
+                        style="@style/MaterialAlertDialog.MaterialComponents.Title.Text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="El Niño" />
+
+                <ImageButton
+                        android:id="@+id/btn_expand"
+                        style="@style/Widget.AppCompat.ActionButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="0dp"
+                        android:clickable="false"
+                        android:src="@drawable/ic_expand_more_black_24dp" />
+            </LinearLayout>
+
+            <RelativeLayout
+                    android:id="@+id/expansion_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="8dp"
+                    android:visibility="gone">
+
+                <View
+                        android:id="@+id/divider_expand"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@color/colorSecondaryVariant" />
+
+                <Button
+                        android:id="@+id/btn_apply"
+                        style="@style/Widget.AppCompat.Button.Borderless"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/divider_expand"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginLeft="8dp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:onClick="@{clickListener::onClick}"
+                        android:padding="4dp"
+                        android:text="Apply" />
+
+                <ImageButton
+                        android:id="@+id/btn_edit"
+                        style="@style/Widget.AppCompat.ActionButton"
+                        android:layout_width="28dp"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/divider_expand"
+                        android:layout_alignBottom="@id/btn_apply"
+                        android:layout_toLeftOf="@id/btn_delete"
+                        android:onClick="@{clickListener::onClick}"
+                        android:src="@drawable/ic_edit_black_24dp" />
+
+                <ImageButton
+                        android:id="@+id/btn_delete"
+                        style="@style/Widget.AppCompat.ActionButton"
+                        android:layout_width="28dp"
+                        android:layout_height="0dp"
+                        android:layout_below="@id/divider_expand"
+                        android:layout_alignBottom="@id/btn_apply"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="8dp"
+                        android:foregroundGravity="center"
+                        android:onClick="@{clickListener::onClick}"
+                        android:src="@drawable/ic_delete_black_24dp" />
+            </RelativeLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</layout>

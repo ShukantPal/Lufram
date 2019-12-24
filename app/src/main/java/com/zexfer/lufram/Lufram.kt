@@ -3,14 +3,22 @@ package com.zexfer.lufram
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.renderscript.Allocation
+import android.renderscript.Element
+import android.renderscript.RenderScript
+import android.renderscript.ScriptIntrinsicBlur
 import android.util.Log
 import androidx.preference.PreferenceManager
 import com.zexfer.lufram.billing.IabHelper
+import java.util.concurrent.Executors
 
 class Lufram : Application() {
 
     lateinit var iabHelper: IabHelper
     lateinit var defaultPrefs: SharedPreferences
+
+    val wallpaperTaskExecutor by lazy { Executors.newSingleThreadExecutor() }
 
     override fun onCreate() {
         super.onCreate()
@@ -43,6 +51,26 @@ class Lufram : Application() {
             get() {
                 return CONTEXT
             }
+
+        val renderScript by lazy {
+            RenderScript.create(context)
+        }
+
+        val blurScript by lazy {
+            val script = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript))
+            script.setRadius(25f)
+            script
+        }
+
+        fun applyBlur(bitmap: Bitmap, out: Bitmap = bitmap) {
+            val inAlloc = Allocation.createFromBitmap(renderScript, bitmap)
+            val outAlloc = Allocation.createTyped(renderScript, inAlloc.type)
+
+            blurScript.setInput(inAlloc)
+            blurScript.forEach(outAlloc)
+
+            outAlloc.copyTo(out)
+        }
 
         /**
          * Default database key used in Lufram.

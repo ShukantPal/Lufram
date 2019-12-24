@@ -10,7 +10,8 @@ import com.zexfer.lufram.expanders.Expander
 class WallpaperPreviewAdapter(
     private val context: Context,
     private val expander: Expander,
-    val initialBase: Int = 0
+    initialBase: Int = 0,
+    private val clickListener: View.OnClickListener? = null
 ) : PagerAdapter() {
 
     var base: Int = initialBase
@@ -31,6 +32,11 @@ class WallpaperPreviewAdapter(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+
+            if (clickListener !== null) {
+                isClickable = true
+                setOnClickListener(clickListener)
+            }
         }.also {
             container.addView(it)
         }

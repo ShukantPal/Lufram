@@ -1,11 +1,15 @@
 package com.zexfer.lufram
 
 import android.content.Intent
+import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.Navigation
@@ -36,6 +40,30 @@ class MainActivity : AppCompatActivity(),
             Navigation.findNavController(findViewById(R.id.nav_host_fragment)),
             dlRoot
         )
+
+        ViewModelProviders.of(this)[WCViewModel::class.java]
+            .activeWallpaperBitmap
+            .observe(this, Observer { wp: Bitmap? ->
+                if (wp === null) {
+                    return@Observer
+                }
+
+                val blurredWp =
+                    Bitmap.createBitmap(wp.width, wp.height, Bitmap.Config.ARGB_8888)
+                val finalWp =
+                    Bitmap.createBitmap(wp.width, wp.height, Bitmap.Config.ARGB_8888)
+
+                Lufram.applyBlur(wp, blurredWp)
+
+                Canvas(finalWp)
+                    .drawBitmap(blurredWp, 0f, 0f,
+                        Paint().apply {
+                            colorFilter =
+                                PorterDuffColorFilter(0x88ffffff.toInt(), PorterDuff.Mode.SRC_OVER)
+                        })
+
+                dlRoot!!.background = BitmapDrawable(resources, finalWp)
+            })
     }
 
     override fun onStart() {

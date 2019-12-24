@@ -12,7 +12,7 @@ import androidx.viewpager.widget.ViewPager.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 
-class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeListener {
+class MainFragment : Fragment(), View.OnClickListener, OnPageChangeListener {
 
     private var tabsPager: ViewPager? = null
     private var tabsLayout: TabLayout? = null
@@ -30,7 +30,10 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
                 pager.addOnPageChangeListener(this)
             }
             fabMain = it.findViewById<FloatingActionButton>(R.id.fab_main)
-                .also { fab -> fab.setOnClickListener(this) }
+                .also { fab ->
+                    fab.setOnClickListener(this)
+                    fab.animate()
+                }
 
             tabsPager!!.adapter = MainTabsAdapter(childFragmentManager)
             tabsPager!!.currentItem = 1
@@ -47,7 +50,6 @@ class MainFragment : Fragment(), View.OnClickListener, ViewPager.OnPageChangeLis
         super.onStart()
         tabsLayout = activity!!.findViewById(R.id.tabs)
         tabsLayout!!.setupWithViewPager(tabsPager)
-        tabsLayout!!.tabGravity = TabLayout.GRAVITY_CENTER
         tabsLayout!!.visibility = View.VISIBLE
 
         if (!fabShown) {
