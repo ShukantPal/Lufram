@@ -1,4 +1,4 @@
-package com.zexfer.lufram
+package com.zexfer.lufram.gui
 
 import android.content.ClipData
 import android.content.Intent
@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
+import com.zexfer.lufram.R
 import com.zexfer.lufram.adapters.ThumbnailListAdapter
 import com.zexfer.lufram.database.models.WallpaperCollection
 import com.zexfer.lufram.database.models.WallpaperCollection.Companion.FORMAT_IMAGES
@@ -75,7 +76,7 @@ class WCEditorFragment :
                 val source = arguments!!.getParcelable<WallpaperCollection>("source")
 
                 if (source != null) {
-                    wcId = source.id
+                    wcId = source.rowId
                     editName!!.setText(source.label)
                     wallpaperUris = source.sources.toMutableList()
                 }

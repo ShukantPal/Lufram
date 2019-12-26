@@ -6,7 +6,7 @@
         android:layout_height="match_parent"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        tools:context=".SelectIntervalDialogFragment">
+        tools:context=".gui.dialogs.SelectIntervalDialog">
 
     <TextView
             android:id="@+id/text_title"

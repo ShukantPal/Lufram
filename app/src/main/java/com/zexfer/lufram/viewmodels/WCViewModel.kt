@@ -1,4 +1,4 @@
-package com.zexfer.lufram
+package com.zexfer.lufram.viewmodels
 
 import android.content.SharedPreferences
 import android.graphics.Bitmap
@@ -6,6 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_ID
 import com.zexfer.lufram.Lufram.Companion.PREF_WALLPAPER_INDEX
+import com.zexfer.lufram.LuframRepository
+import com.zexfer.lufram.WallpaperUpdateController
 
 class WCViewModel : ViewModel(), SharedPreferences.OnSharedPreferenceChangeListener {
 

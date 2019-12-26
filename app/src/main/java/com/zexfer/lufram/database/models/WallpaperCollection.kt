@@ -22,7 +22,8 @@ data class WallpaperCollection(
     var lastUpdaterId: Int = -1,
 
     @PrimaryKey(autoGenerate = true)
-    var id: Int? = null
+    @ColumnInfo(name = "rowid")
+    var rowId: Int? = null
 ) : Parcelable {
     val readOnly: Boolean
         get() {
@@ -43,10 +44,7 @@ data class WallpaperCollection(
     }
 
     override fun hashCode(): Int {
-        throw UnsupportedOperationException(
-            "WallpaperCollection does not " +
-                    "support hashCode()!"
-        )
+        throw UnsupportedOperationException("WallpaperCollection does not support hashCode()!")
     }
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
@@ -54,7 +52,7 @@ data class WallpaperCollection(
         dest.writeInt(formatType)
         dest.writeString(label)
         dest.writeInt(lastUpdaterId)
-        dest.writeInt(id ?: -1)
+        dest.writeInt(rowId ?: -1)
     }
 
     companion object {

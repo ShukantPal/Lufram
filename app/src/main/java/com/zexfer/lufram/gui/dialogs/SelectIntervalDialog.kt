@@ -1,12 +1,13 @@
-package com.zexfer.lufram
+package com.zexfer.lufram.gui.dialogs
 
 import android.app.Dialog
 import android.os.Bundle
 import android.widget.Button
 import android.widget.NumberPicker
 import androidx.fragment.app.DialogFragment
+import com.zexfer.lufram.R
 
-class SelectIntervalDialogFragment : DialogFragment() {
+class SelectIntervalDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         if (targetFragment == null) {
@@ -45,7 +46,7 @@ class SelectIntervalDialogFragment : DialogFragment() {
         val ARG_MIN = "interval_min"
 
         fun newInstance(hr: Int, min: Int) =
-            SelectIntervalDialogFragment().apply {
+            SelectIntervalDialog().apply {
                 arguments = Bundle().apply {
                     putInt(ARG_HR, hr)
                     putInt(ARG_MIN, min)

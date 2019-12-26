@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/rv_search_results"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        tools:context=".gui.SearchFragment">
+
+    <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            class="com.zexfer.lufram.gui.ShowcaseFragment" />
+</FrameLayout>

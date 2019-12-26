@@ -10,24 +10,30 @@
             android:divider="@drawable/divider"
             android:orientation="vertical"
             android:showDividers="middle"
-            tools:context=".TimelineFragment">
+            tools:context=".gui.TimelineFragment">
 
-        <androidx.viewpager.widget.ViewPager
-                android:id="@+id/wc_pager"
+        <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
                 android:layout_weight="1"
-                android:clipToPadding="false"
-                android:paddingStart="32dp"
-                android:paddingEnd="32dp" />
+                android:background="@color/colorBackgroundTranslucent">
+
+            <androidx.viewpager.widget.ViewPager
+                    android:id="@+id/wc_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:clipToPadding="false"
+                    android:paddingStart="32dp"
+                    android:paddingEnd="32dp" />
+        </FrameLayout>
 
 
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorBackgroundTranslucent">
+                android:background="@color/colorBackgroundTranslucentStrong">
 
             <HorizontalScrollView
                     android:layout_width="0dp"

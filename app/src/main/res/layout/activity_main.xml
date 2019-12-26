@@ -11,15 +11,15 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:backgroundTint="@color/colorBackgroundTranslucent">
 
         <com.google.android.material.appbar.AppBarLayout
                 android:id="@+id/app_bar_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:elevation="4dp"
-                android:backgroundTint="@color/colorBackgroundTranslucent"
                 android:padding="0dp"
+                android:fitsSystemWindows="true"
                 app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.Toolbar
@@ -30,13 +30,12 @@
                     app:titleTextAppearance="@style/LuframTheme.TextAppearance.AppBar"
                     app:title="Your Lufram Library"
                     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                    style="@style/LuframTheme.Toolbar" />
+                    style="@style/LuframTheme.Toolbar"></androidx.appcompat.widget.Toolbar>
 
             <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tabs"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorBackgroundTranslucent"
                     android:visibility="gone"
                     app:tabTextAppearance="@style/LuframTheme.TextAppearance.Tab"
                     style="@style/Widget.MaterialComponents.TabLayout.Colored" />

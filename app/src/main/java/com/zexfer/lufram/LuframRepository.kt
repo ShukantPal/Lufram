@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.LifecycleObserver
 import com.zexfer.lufram.Lufram.Companion.LUFRAM_PREFS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_INTERVAL_MILLIS
@@ -38,8 +39,14 @@ object LuframRepository : LifecycleObserver {
     val lastUpdateTimestamp: Long
         get() = luframPrefs.getLong(PREF_UPDATER_TIMESTAMP, 0)
 
+    val isRandomized: Boolean
+        get() = (configMode == CONFIG_PERIODIC) && luframPrefs.getBoolean(
+            PREF_CONFIG_RANDOMIZE_ORDER,
+            false
+        )
+
     fun deleteWallpaper(wallpaper: WallpaperCollection) {
-        if (preferredWallpaperId() == wallpaper.id)
+        if (preferredWallpaperId() == wallpaper.rowId)
             stopWallpaper()
         DeleteWallpaperTask().execute(wallpaper)
     }
@@ -55,6 +62,7 @@ object LuframRepository : LifecycleObserver {
     }
 
     fun commitConfig(config: PeriodicConfig): Boolean {
+        Log.d("Lufram", config.randomizeOrder.toString())
         val isModeDiff = luframPrefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC) != CONFIG_PERIODIC
         val isIntervalDiff =
             luframPrefs.getLong(PREF_CONFIG_INTERVAL_MILLIS, 3600000) != config.intervalMillis

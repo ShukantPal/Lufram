@@ -11,6 +11,9 @@ import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
+import com.zexfer.lufram.gui.ConfigFragment
+import com.zexfer.lufram.gui.ShowcaseFragment
+import com.zexfer.lufram.gui.dialogs.TimelineUnavailableDialog
 
 class MainFragment : Fragment(), View.OnClickListener, OnPageChangeListener {
 
@@ -78,7 +81,20 @@ class MainFragment : Fragment(), View.OnClickListener, OnPageChangeListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.option_search -> {
+                findNavController().navigate(R.id.action_mainFragment_to_searchFragment)
+            }
             R.id.option_timeline -> {
+                if (LuframRepository.isRandomized) {
+                    fragmentManager!!.beginTransaction()
+                        .add(
+                            TimelineUnavailableDialog.newInstance(TL_UNAVAILABLE_RANDOM),
+                            "frag_timeline_unavailable"
+                        )
+                        .commitNow()
+                    return true
+                }
+
                 findNavController().navigate(
                     R.id.action_mainFragment_to_timelineFragment,
                     Bundle().apply {
@@ -116,7 +132,7 @@ class MainFragment : Fragment(), View.OnClickListener, OnPageChangeListener {
         override fun getItem(position: Int): Fragment {
             when (position) {
                 FRAG_CONFIG -> return ConfigFragment()
-                FRAG_LIBRARY -> return WCPreviewFragment()
+                FRAG_LIBRARY -> return ShowcaseFragment()
                 else -> throw IllegalArgumentException("position is invalid!")
             }
         }
@@ -138,5 +154,8 @@ class MainFragment : Fragment(), View.OnClickListener, OnPageChangeListener {
     companion object {
         val FRAG_CONFIG = 0
         val FRAG_LIBRARY = 1
+
+        const val TL_UNAVAILABLE_RANDOM =
+            "A timeline cannot be shown because you have set wallpapers to be updated in a randomized order."
     }
 }

@@ -24,4 +24,5 @@
 
     <color name="colorSecondaryTranslucent">#aa000000</color>
     <color name="colorBackgroundTranslucent">#99ffffff</color>
+    <color name="colorBackgroundTranslucentStrong">#eeffffff</color>
 </resources>

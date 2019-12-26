@@ -5,7 +5,7 @@
 
         <variable
                 name="clickListener"
-                type="com.zexfer.lufram.WCPreviewFragment.ViewHolder" />
+                type="android.view.View.OnClickListener" />
 
         <variable
                 name="wallpaperPreviewAdapter"

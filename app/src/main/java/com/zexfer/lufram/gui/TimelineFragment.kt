@@ -1,9 +1,12 @@
-package com.zexfer.lufram
+package com.zexfer.lufram.gui
 
 
 import android.app.AlarmManager.INTERVAL_DAY
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.SparseArray
@@ -17,19 +20,27 @@ import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
+import com.zexfer.lufram.Lufram
+import com.zexfer.lufram.LuframRepository
 import com.zexfer.lufram.LuframRepository.CONFIG_DYNAMIC
 import com.zexfer.lufram.LuframRepository.CONFIG_PERIODIC
+import com.zexfer.lufram.R
+import com.zexfer.lufram.WallpaperUpdateController
 import com.zexfer.lufram.adapters.WallpaperPreviewAdapter
 import com.zexfer.lufram.database.models.WallpaperCollection
 import com.zexfer.lufram.database.tasks.WallpaperTask
 import com.zexfer.lufram.databinding.FragmentTimelineBinding
 import com.zexfer.lufram.expanders.Expander
+import com.zexfer.lufram.gui.dialogs.WhatsThisTimelineDialog
 import java.util.*
 
-class TimelineFragment : Fragment(),
-    View.OnClickListener,
-    ViewPager.OnPageChangeListener,
-    PopupMenu.OnMenuItemClickListener {
+/**
+ * Fragment that predicts the timeline of wallpaper switches in
+ * the future (via {@code WallpaperUpdateController}). Currently,
+ * it is not customizable.
+ */
+class TimelineFragment : Fragment(), View.OnClickListener,
+    ViewPager.OnPageChangeListener, PopupMenu.OnMenuItemClickListener {
 
     private lateinit var wallpaperCollection: WallpaperCollection
     private lateinit var expander: Expander
@@ -49,8 +60,13 @@ class TimelineFragment : Fragment(),
         WallpaperUpdateController.estimatedWallpaperIndex()
     }
 
+    /** View-binding for the layout. */
     private lateinit var viewBinding: FragmentTimelineBinding
+
+    /** Cache of blurred wallpapers from the collection. */
     private lateinit var blurCache: SparseArray<BitmapDrawable?>
+
+    /** Options menu at the bottom-right corner. */
     private lateinit var moreOptionsMenu: PopupMenu
 
     override fun onCreateView(
@@ -94,7 +110,7 @@ class TimelineFragment : Fragment(),
         when (item?.itemId) {
             R.id.item_whats_this -> {
                 fragmentManager!!.beginTransaction()
-                    .add(WhatsThisTimelineDialogFragment(), "whats_this_timeline")
+                    .add(WhatsThisTimelineDialog(), "whats_this_timeline")
                     .commitNow()
             }
             else -> {
@@ -132,7 +148,10 @@ class TimelineFragment : Fragment(),
         val tsHr = c.get(Calendar.HOUR_OF_DAY)
         val tsMin = c.get(Calendar.MINUTE)
         viewBinding.textEstimatedHitTime.text =
-            LuframRepository.PeriodicConfig.formattedIntervalString(tsHr.toInt(), tsMin.toInt())
+            LuframRepository.PeriodicConfig.formattedIntervalString(
+                tsHr.toInt(),
+                tsMin.toInt()
+            )
 
         val ddelt = (c.get(Calendar.DAY_OF_YEAR) - c0.get(Calendar.DAY_OF_YEAR) + 365) % 365
 
@@ -148,13 +167,8 @@ class TimelineFragment : Fragment(),
                 val blurBitmap =
                     Bitmap.createBitmap(srcBitmap.width, srcBitmap.height, Bitmap.Config.ARGB_8888)
 
-                Canvas(blurBitmap).drawBitmap(srcBitmap, 0f, 0f, BG_PAINT)
-
-                blurCache.set(
-                    collIndex,
-                    BitmapDrawable(context!!.resources, blurBitmap)
-                )
-
+                Lufram.applyBlur(srcBitmap, blurBitmap)
+                blurCache.set(collIndex, BitmapDrawable(context!!.resources, blurBitmap))
                 viewBinding.root.background = blurCache.get(collIndex)
             }
         } else {
@@ -176,7 +190,12 @@ class TimelineFragment : Fragment(),
             pageMargin = 16
             isHorizontalScrollBarEnabled = true
 
-            setPageTransformer(false, CarouselEffectTransformer(context!!))
+            setPageTransformer(
+                false,
+                CarouselEffectTransformer(
+                    context!!
+                )
+            )
             addOnPageChangeListener(this@TimelineFragment)
         }
 
@@ -222,8 +241,11 @@ class TimelineFragment : Fragment(),
         const val PAGE_MARGIN = 16
         const val ARG_ID = "id"
 
-        val BG_FILTER = PorterDuffColorFilter(0xeeffffff.toInt(), PorterDuff.Mode.SRC_OVER)
-        val BG_PAINT = Paint().apply { colorFilter = BG_FILTER }
+        val BG_FILTER = PorterDuffColorFilter(0x88ffffff.toInt(), PorterDuff.Mode.SRC_OVER)
+        val BG_PAINT = Paint().apply {
+            colorFilter =
+                BG_FILTER
+        }
 
         fun newInstance(id: Int) =
             TimelineFragment().apply {

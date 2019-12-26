@@ -6,7 +6,7 @@
         app:startDestination="@id/mainFragment">
     <fragment
             android:id="@+id/wcEditorFragment"
-            android:name="com.zexfer.lufram.WCEditorFragment"
+            android:name="com.zexfer.lufram.gui.WCEditorFragment"
             android:label="Edit Collection"
             tools:layout="@layout/fragment_wc_editor" />
     <fragment
@@ -29,15 +29,18 @@
         <action
                 android:id="@+id/action_mainFragment_to_timelineFragment"
                 app:destination="@id/timelineFragment" />
+        <action
+                android:id="@+id/action_mainFragment_to_searchFragment"
+                app:destination="@id/searchFragment" />
     </fragment>
     <fragment
             android:id="@+id/donateFragment"
-            android:name="com.zexfer.lufram.DonateFragment"
+            android:name="com.zexfer.lufram.gui.DonateFragment"
             android:label="Support Development"
             tools:layout="@layout/fragment_donate" />
     <fragment
             android:id="@+id/aboutFragment"
-            android:name="com.zexfer.lufram.AboutFragment"
+            android:name="com.zexfer.lufram.gui.AboutFragment"
             android:label="Learn More"
             tools:layout="@layout/fragment_about">
         <action
@@ -46,15 +49,20 @@
     </fragment>
     <fragment
             android:id="@+id/settingsFragment"
-            android:name="com.zexfer.lufram.SettingsFragment"
+            android:name="com.zexfer.lufram.gui.SettingsFragment"
             android:label="Settings" />
     <fragment
             android:id="@+id/timelineFragment"
-            android:name="com.zexfer.lufram.TimelineFragment"
+            android:name="com.zexfer.lufram.gui.TimelineFragment"
             android:label="Timeline"
             tools:layout="@layout/fragment_timeline">
         <argument
                 android:name="id"
                 app:argType="integer" />
     </fragment>
+    <fragment
+            android:id="@+id/searchFragment"
+            android:name="com.zexfer.lufram.gui.SearchFragment"
+            android:label="Search"
+            tools:layout="@layout/fragment_search" />
 </navigation>

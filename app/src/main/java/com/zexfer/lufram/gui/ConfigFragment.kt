@@ -1,4 +1,4 @@
-package com.zexfer.lufram
+package com.zexfer.lufram.gui
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -19,10 +19,13 @@ import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_INTERVAL_MILLIS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_RANDOMIZE_ORDER
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_TIMEZONE_ADJUSTED_ENABLED
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_TYPE
+import com.zexfer.lufram.LuframRepository
 import com.zexfer.lufram.LuframRepository.CONFIG_PERIODIC
+import com.zexfer.lufram.R
+import com.zexfer.lufram.gui.dialogs.SelectIntervalDialog
 
 class ConfigFragment : Fragment(), View.OnClickListener,
-    SelectIntervalDialogFragment.OnIntervalSelectedListener {
+    SelectIntervalDialog.OnIntervalSelectedListener {
 
     private var entryMode: LinearLayout? = null
     private var textMode: TextView? = null
@@ -36,7 +39,8 @@ class ConfigFragment : Fragment(), View.OnClickListener,
     private var modeFrame: FrameLayout? = null
     private var modeFrameBridge: ConfigAdapterBridge? = null
 
-    private var mode: Int = MODE_PERIODIC
+    private var mode: Int =
+        MODE_PERIODIC
     private var periodicConfig: LuframRepository.PeriodicConfig? = null
     private var dynamicConfig: LuframRepository.DynamicConfig? = null
 
@@ -58,16 +62,21 @@ class ConfigFragment : Fragment(), View.OnClickListener,
             //modePager!!.adapter = ConfigAdapter(this, periodicConfig!!, dynamicConfig!!)
             //modePager!!.currentItem = mode
             textMode!!.text = MODES[mode]
-            modeFrameBridge = ConfigAdapterBridge(
-                ConfigAdapter(this, periodicConfig!!, dynamicConfig!!),
-                modeFrame!!
-            )
+            modeFrameBridge =
+                ConfigAdapterBridge(
+                    ConfigAdapter(
+                        this,
+                        periodicConfig!!,
+                        dynamicConfig!!
+                    ),
+                    modeFrame!!
+                )
             modeFrameBridge!!.setCurrentItem(mode)
         }
 
     override fun onResume() {
         super.onResume()
-        updateConfigCache()
+        // updateConfigCache()
         //(modePager!!.adapter as ConfigAdapter).updateConfigs(periodicConfig!!, dynamicConfig!!)
         modeFrameBridge!!.configAdapter.updateConfigs(periodicConfig!!, dynamicConfig!!)
     }
@@ -116,7 +125,10 @@ class ConfigFragment : Fragment(), View.OnClickListener,
         periodicConfig!!.intervalMillis = (1000 * (hr.toLong() * 3600 + min.toLong() * 60))
 
         view!!.findViewById<TextView?>(R.id.text_interval)?.text =
-            LuframRepository.PeriodicConfig.formattedIntervalString(hr, min)
+            LuframRepository.PeriodicConfig.formattedIntervalString(
+                hr,
+                min
+            )
     }
 
     private fun toMode(value: Int) {
@@ -195,12 +207,18 @@ class ConfigFragment : Fragment(), View.OnClickListener,
                 .inflate(layoutRes, parent, false)
 
             return when (viewType) {
-                POSITION_PERIODIC -> PeriodicConfigViewHolder(targetFragment, rootView)
-                else -> DynamicConfigViewHolder(rootView) // must be exhaustive
+                POSITION_PERIODIC -> PeriodicConfigViewHolder(
+                    targetFragment,
+                    rootView
+                )
+                else -> DynamicConfigViewHolder(
+                    rootView
+                ) // must be exhaustive
             }
         }
 
-        override fun getItemCount(): Int = CONFIG_COUNT
+        override fun getItemCount(): Int =
+            CONFIG_COUNT
 
         override fun getItemViewType(position: Int): Int = position
 
@@ -248,7 +266,10 @@ class ConfigFragment : Fragment(), View.OnClickListener,
 
                     targetFragment.fragmentManager!!.beginTransaction()
                         .add(
-                            SelectIntervalDialogFragment.newInstance(hr, min).also { frag ->
+                            SelectIntervalDialog.newInstance(
+                                hr,
+                                min
+                            ).also { frag ->
                                 frag.setTargetFragment(targetFragment, 1337)
                             },
                             "SelectIntervalDialogFragment"

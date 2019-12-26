@@ -100,7 +100,7 @@ class WallpaperUpdateReceiver : BroadcastReceiver() {
                     rerunTask = true
                     LuframRepository.putWallpaper(result)
                 } else {
-                    LuframRepository.deleteWallpaper(result.id!!)
+                    LuframRepository.deleteWallpaper(result.rowId!!)
                 }
             }
 

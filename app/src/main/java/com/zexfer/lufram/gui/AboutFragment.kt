@@ -1,4 +1,4 @@
-package com.zexfer.lufram
+package com.zexfer.lufram.gui
 
 import android.content.Intent
 import android.content.Intent.ACTION_VIEW
@@ -11,8 +11,14 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.LibsBuilder
+import com.zexfer.lufram.R
 
+/**
+ * Fragment that displays information about this app & its author.
+ */
 class AboutFragment : Fragment(), View.OnClickListener {
+
+    // TODO: Use view-binding, maybe?
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
