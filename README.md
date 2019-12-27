@@ -13,5 +13,5 @@ Lufram let's you switch wallpapers periodically!
 </p>
 <p align="center">
   <img src="https://i.ibb.co/fxthcxB/Screenshot-1577487948.png" width="256px" />
-  <img src-"https://i.ibb.co/KKsL0CW/Screenshot-1577487959.png" width="256px" />
+  <img src="https://i.ibb.co/KKsL0CW/Screenshot-1577487959.png" width="256px" />
 </p>
