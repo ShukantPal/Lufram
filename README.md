@@ -3,6 +3,8 @@
 
 Lufram is an Android app that switches wallpapers periodically. It has two modes - periodic and dynamic. A periodic configuration will setup timers to switch wallpapers after an interval. Dynamic mode would adjust its interval so that each image starts at a specific time in the day, covering all wallpapers in 24 hours.
 
+I've added a special feature - the timeline. It shows you when a wallpaper would be set; it is limited in its ability, have any ideas?
+
 ## Screenshots
 
 <p align="center">
