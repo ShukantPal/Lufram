@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent">
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_root"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="0dp"
+                android:clipToPadding="false"
+                android:paddingRight="8dp"
+                android:paddingBottom="88dp" />
+
+        <RelativeLayout
+                android:id="@+id/frame_nothing_here"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone">
+
+            <ImageView
+                    android:id="@+id/image_nothing_here"
+                    android:layout_width="128dp"
+                    android:layout_height="128dp"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/ic_error" />
+
+            <TextView
+                    android:id="@+id/text_none"
+                    style="@style/TextAppearance.AppCompat.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_below="@id/image_nothing_here"
+                    android:layout_centerHorizontal="true"
+                    android:text="Nothing here! Why don't you create something? ↓" />
+        </RelativeLayout>
+    </FrameLayout>
+</layout>

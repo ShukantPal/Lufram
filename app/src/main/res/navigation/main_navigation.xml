@@ -64,5 +64,9 @@
             android:id="@+id/searchFragment"
             android:name="com.zexfer.lufram.gui.SearchFragment"
             android:label="Search"
-            tools:layout="@layout/fragment_search" />
+            tools:layout="@layout/fragment_search">
+        <action
+                android:id="@+id/action_searchFragment_to_wcEditorFragment"
+                app:destination="@id/wcEditorFragment" />
+    </fragment>
 </navigation>

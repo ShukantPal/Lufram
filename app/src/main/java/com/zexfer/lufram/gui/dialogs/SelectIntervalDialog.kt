@@ -15,7 +15,7 @@ class SelectIntervalDialog : DialogFragment() {
         }
 
         return Dialog(context!!).also { dialog ->
-            dialog.setContentView(R.layout.fragment_select_interval_dialog)
+            dialog.setContentView(R.layout.dialog_select_interval)
 
             val hrPicker = dialog.findViewById<NumberPicker>(R.id.picker_hr).apply {
                 minValue = 0

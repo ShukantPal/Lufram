@@ -8,14 +8,11 @@ import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
-import android.util.Log
 import androidx.preference.PreferenceManager
-import com.zexfer.lufram.billing.IabHelper
 import java.util.concurrent.Executors
 
 class Lufram : Application() {
 
-    lateinit var iabHelper: IabHelper
     lateinit var defaultPrefs: SharedPreferences
 
     val wallpaperTaskExecutor by lazy { Executors.newSingleThreadExecutor() }
@@ -26,14 +23,6 @@ class Lufram : Application() {
         INSTANCE = this
         CONTEXT = this.applicationContext
         defaultPrefs = PreferenceManager.getDefaultSharedPreferences(context)
-
-        iabHelper = IabHelper(context, BuildConfig.LICENSE_KEY).apply {
-            startSetup { result ->
-                if (result.isFailure) {
-                    Log.e("Lufram", "iabHelp fail $result")
-                }
-            }
-        }
     }
 
     companion object {

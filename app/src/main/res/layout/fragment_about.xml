@@ -51,24 +51,6 @@
                 </LinearLayout>
 
                 <LinearLayout
-                        android:id="@+id/entry_app_introduction"
-                        style="@style/about_entry">
-
-                    <ImageView
-                            style="@style/material_icon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_open_book_black_24dp" />
-
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:text="Introduction"
-                            android:textSize="18sp" />
-                </LinearLayout>
-
-                <LinearLayout
                         android:id="@+id/entry_github_repo"
                         style="@style/about_entry">
 

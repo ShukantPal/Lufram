@@ -11,6 +11,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -32,6 +34,9 @@ class WCEditorFragment :
     private var rvThumbs: RecyclerView? = null
     private var btnAddWallpapers: FloatingActionButton? = null
     private var btnSubmit: Button? = null
+
+    private var imageNothingHere: ImageView? = null
+    private var textNothingHere: TextView? = null
 
     private var thumbSize: Size? = null
     private var thumbListAdapter: ThumbnailListAdapter? = null
@@ -62,6 +67,9 @@ class WCEditorFragment :
             btnAddWallpapers = root.findViewById(R.id.fab_add_wp)
             btnSubmit = root.findViewById(R.id.btn_submit)
 
+            imageNothingHere = root.findViewById(R.id.image_nothing_here)
+            textNothingHere = root.findViewById(R.id.text_nothing_here)
+
             btnAddWallpapers!!.setOnClickListener(this)
             btnSubmit!!.setOnClickListener(this)
 
@@ -79,6 +87,11 @@ class WCEditorFragment :
                     wcId = source.rowId
                     editName!!.setText(source.label)
                     wallpaperUris = source.sources.toMutableList()
+
+                    if (wallpaperUris!!.size > 0) {
+                        imageNothingHere!!.visibility = View.GONE
+                        textNothingHere!!.visibility = View.GONE
+                    }
                 }
             } else {
                 wallpaperUris = mutableListOf()
@@ -126,6 +139,11 @@ class WCEditorFragment :
 
         wallpaperUris!!.removeAt(position)
         thumbListAdapter!!.submitList(ArrayList(wallpaperUris!!))
+
+        if (wallpaperUris!!.size == 0) {
+            imageNothingHere!!.visibility = View.VISIBLE
+            textNothingHere!!.visibility = View.VISIBLE
+        }
     }
 
     override fun onDestroyView() {
@@ -170,6 +188,11 @@ class WCEditorFragment :
 
                 wallpaperUris!!.addAll(uriDeltaArray)
                 thumbListAdapter!!.submitList(ArrayList(wallpaperUris!!))
+
+                if (wallpaperUris!!.size > 0) {
+                    imageNothingHere!!.visibility = View.GONE
+                    textNothingHere!!.visibility = View.GONE
+                }
             }
             else -> super.onActivityResult(requestCode, resultCode, data)
         }

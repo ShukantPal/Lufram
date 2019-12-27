@@ -20,8 +20,10 @@ import com.zexfer.lufram.databinding.LayoutWallpaperPreviewCardBinding
 import com.zexfer.lufram.expanders.Expander
 import java.util.*
 
-class ShowcaseViewAdapter(private val inflater: LayoutInflater) :
-    ListAdapter<WallpaperCollection, ViewHolder>(DIFF_CALLBACK) {
+class ShowcaseViewAdapter(
+    private val inflater: LayoutInflater,
+    private val editorNavAction: Int
+) : ListAdapter<WallpaperCollection, ViewHolder>(DIFF_CALLBACK) {
 
     private var rvs: MutableList<RecyclerView> = mutableListOf()
 
@@ -89,7 +91,8 @@ class ShowcaseViewAdapter(private val inflater: LayoutInflater) :
                 R.layout.layout_wallpaper_preview_card,
                 parent,
                 false
-            )
+            ),
+            editorNavAction
         )
     }
 
@@ -157,8 +160,10 @@ class ShowcaseViewAdapter(private val inflater: LayoutInflater) :
     }
 }
 
-class ViewHolder(private val viewBinding: LayoutWallpaperPreviewCardBinding) :
-    RecyclerView.ViewHolder(viewBinding.root),
+class ViewHolder(
+    private val viewBinding: LayoutWallpaperPreviewCardBinding,
+    private val editorNavAction: Int
+) : RecyclerView.ViewHolder(viewBinding.root),
     SharedPreferences.OnSharedPreferenceChangeListener,
     View.OnClickListener {
 
@@ -218,7 +223,7 @@ class ViewHolder(private val viewBinding: LayoutWallpaperPreviewCardBinding) :
     fun openEditor() {
         Navigation.findNavController(viewBinding.root)
             .navigate(
-                R.id.action_mainFragment_to_WCEditorFragment,
+                editorNavAction,
                 Bundle().apply {
                     putParcelable("source", boundWallpaper)
                 })

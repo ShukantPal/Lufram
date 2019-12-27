@@ -5,11 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
 import com.zexfer.lufram.Lufram
@@ -17,6 +17,7 @@ import com.zexfer.lufram.R
 import com.zexfer.lufram.adapters.ShowcaseViewAdapter
 import com.zexfer.lufram.database.LuframDatabase
 import com.zexfer.lufram.database.models.WallpaperCollection
+import com.zexfer.lufram.databinding.FragmentShowcaseBinding
 import java.util.*
 
 /**
@@ -31,13 +32,19 @@ import java.util.*
  * {@code ShowcaseFragment} automatically adjusts its layout based on the
  * user's preference (via Lufram's default shared-prefs); however, it can
  * be instantiated with arguments to override those settings.
+ *
+ * <p>
+ * You can supply a drawable resource id as the "Nothing Here" icon.
  */
 class ShowcaseFragment : Fragment() {
 
-    private var rvRoot: RecyclerView? = null
-    private var frameNothingHere: View? = null
+    /** Adapter for recycler-view */
     private var showcaseViewAdapter: ShowcaseViewAdapter? = null
 
+    /** View-binding for the layout */
+    private lateinit var viewBinding: FragmentShowcaseBinding
+
+    /** Live-data provider for wallpaper collection(s) */
     private var showcaseProvider: ShowcaseProvider? = null
 
     override fun onAttach(context: Context) {
@@ -54,50 +61,71 @@ class ShowcaseFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? =
-        inflater.inflate(R.layout.fragment_wc_preview, container, false).also {
-            rvRoot = it.findViewById(R.id.rv_root)
-            frameNothingHere = it.findViewById(R.id.frame_none)
-            showcaseViewAdapter = ShowcaseViewAdapter(inflater)
-
-            rvRoot!!.adapter = showcaseViewAdapter
-            rvRoot!!.isVerticalScrollBarEnabled = false
-            if (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid") == "List") {
-                rvRoot!!.setPadding(0, 0, 0, 240)
-            }
-
-            when (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid")) {
-                "Cards", "List" -> rvRoot!!.layoutManager = LinearLayoutManager(context)
-                "Grid" -> rvRoot!!.layoutManager = StaggeredGridLayoutManager(2, VERTICAL)
-            }
-
-            if (savedInstanceState !== null) {
-                return@also
-            }
-
-            // Observes the wallpaper-collection list live-data.
-            val showcaseObserver = Observer<List<WallpaperCollection>> {
-                if (it.isEmpty()) {
-                    frameNothingHere!!.visibility = View.VISIBLE
-                } else {
-                    frameNothingHere!!.visibility = View.GONE
-                }
-
-                showcaseViewAdapter!!.submitList(ArrayList(it))
-            }
-
-            if (showcaseProvider == null) {
-                // Default behaviour: show local library sorted by lastUpdaterId
-                LuframDatabase.instance
-                    .wcDao()
-                    .allSorted()
-                    .observe(this, showcaseObserver)
+    ): View? {
+        viewBinding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_showcase,
+            container,
+            false
+        )
+        showcaseViewAdapter = ShowcaseViewAdapter(
+            inflater,
+            if (showcaseProvider != null) {
+                showcaseProvider!!.editorNavAction
             } else {
-                // Observe supplied library
-                showcaseProvider!!.onShowcaseRequired()
-                    .observe(this, showcaseObserver)
+                R.id.action_mainFragment_to_WCEditorFragment
+            }
+        )
+
+        // Set the nothing here icon, of course!
+        if (arguments != null && arguments!!.getInt(ARG_NOTHING_HERE_ICON, -1) != -1)
+            viewBinding.imageNothingHere.setImageResource(arguments!!.getInt(ARG_NOTHING_HERE_ICON))
+
+        // Initialize RecyclerView properties
+        viewBinding.rvRoot.adapter = showcaseViewAdapter
+        viewBinding.rvRoot.isVerticalScrollBarEnabled = true
+        if (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid") == "List") {
+            viewBinding.rvRoot.setPadding(0, 0, 0, 240)
+        }
+        when (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid")) {
+            "Cards", "List" -> {
+                viewBinding.rvRoot.layoutManager = LinearLayoutManager(context)
+            }
+            "Grid" -> {
+                viewBinding.rvRoot.layoutManager = StaggeredGridLayoutManager(2, VERTICAL)
             }
         }
+
+        // If is saved-instance, no need to observe() again
+        if (savedInstanceState !== null) {
+            //  return viewBinding.root
+        }
+
+        // Observes the wallpaper-collection list live-data.
+        val showcaseObserver = Observer<List<WallpaperCollection>> {
+            if (it.isEmpty()) {
+                viewBinding.frameNothingHere.visibility = View.VISIBLE
+            } else {
+                viewBinding.frameNothingHere.visibility = View.GONE
+            }
+
+            showcaseViewAdapter!!.submitList(ArrayList(it))
+        }
+
+        if (showcaseProvider == null) {
+            // Default behaviour: show local library sorted by lastUpdaterId
+            LuframDatabase.instance
+                .wcDao()
+                .allSorted()
+                .observe(this, showcaseObserver)
+        } else {
+            // Observe supplied library
+            showcaseProvider!!.onShowcaseRequired()
+                .observe(this, showcaseObserver)
+        }
+
+        return viewBinding.root
+    }
 
     override fun onResume() {
         super.onResume()
@@ -111,8 +139,6 @@ class ShowcaseFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        rvRoot = null
-        frameNothingHere = null
         showcaseViewAdapter = null
     }
 
@@ -135,5 +161,27 @@ class ShowcaseFragment : Fragment() {
          * objects at different times.
          */
         fun onShowcaseRequired(): LiveData<List<WallpaperCollection>>
+
+        /**
+         * Navigation action to reach editor from showcase.
+         */
+        val editorNavAction: Int
+    }
+
+    companion object {
+        private const val ARG_NOTHING_HERE_ICON = "nothing_here_icon_id"
+
+        /**
+         * Creates a showcase-fragment with a custom "nothing here"
+         * icon.
+         *
+         * @param nothingHereDrawableResourceId - resource id for the icon
+         */
+        fun newInstance(nothingHereDrawableResourceId: Int) =
+            ShowcaseFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(ARG_NOTHING_HERE_ICON, nothingHereDrawableResourceId)
+                }
+            }
     }
 }

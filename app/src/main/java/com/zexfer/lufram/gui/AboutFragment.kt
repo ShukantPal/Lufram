@@ -25,8 +25,6 @@ class AboutFragment : Fragment(), View.OnClickListener {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_about, container, false).also {
-            it.findViewById<View>(R.id.entry_app_introduction)
-                .setOnClickListener(this)
             it.findViewById<View>(R.id.entry_about_libraries)
                 .setOnClickListener(this)
             it.findViewById<View>(R.id.entry_github_repo)
@@ -53,6 +51,9 @@ class AboutFragment : Fragment(), View.OnClickListener {
                     .withActivityStyle(Libs.ActivityStyle.LIGHT)
                     .start(context!!)
                     .also { return }
+            }
+            R.id.entry_rate -> {
+                uri = Uri.parse("https://play.google.com/store/apps/details?id=com.zexfer.lufram")
             }
             R.id.entry_donate -> {
                 findNavController().navigate(R.id.action_aboutFragment_to_donateFragment)

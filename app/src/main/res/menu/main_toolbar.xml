@@ -8,7 +8,7 @@
             app:showAsAction="always" />
     <item
             android:id="@+id/option_timeline"
-            android:icon="@drawable/ic_timeline_black_24dp"
+            android:icon="@drawable/ic_stopwatch"
             android:title="Item"
             app:showAsAction="always" />
 </menu>

@@ -26,14 +26,21 @@ class SearchFragment : Fragment(),
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
     private val searchResults = MutableLiveData<List<WallpaperCollection>>()
-    lateinit var searchAction: WeakReference<MenuItem>
+    private lateinit var searchAction: WeakReference<MenuItem>
+
+    override val editorNavAction: Int = R.id.action_searchFragment_to_wcEditorFragment
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? =
         inflater.inflate(R.layout.fragment_search, container, false).also {
+            childFragmentManager.beginTransaction()
+                .add(R.id.frame_root, ShowcaseFragment.newInstance(R.drawable.ic_not_found))
+                .commitNow()
+
             setHasOptionsMenu(true)
+            onQueryTextSubmit("")
         }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
