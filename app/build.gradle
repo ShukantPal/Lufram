@@ -18,8 +18,8 @@ android {
         applicationId "com.zexfer.lufram"
         minSdkVersion 22
         targetSdkVersion 29
-        versionCode 23
-        versionName '1.04.4-internal'
+        versionCode 101
+        versionName '1.1-internal-α'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
