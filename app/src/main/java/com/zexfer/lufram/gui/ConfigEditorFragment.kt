@@ -7,13 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.snackbar.Snackbar
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_DAY_RANGE
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_INTERVAL_MILLIS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_RANDOMIZE_ORDER
@@ -21,86 +19,70 @@ import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_TIMEZONE_ADJUSTED_ENABLED
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_TYPE
 import com.zexfer.lufram.LuframRepository
 import com.zexfer.lufram.LuframRepository.CONFIG_PERIODIC
+import com.zexfer.lufram.LuframRepository.DynamicConfig
+import com.zexfer.lufram.LuframRepository.PeriodicConfig
 import com.zexfer.lufram.R
+import com.zexfer.lufram.databinding.FragmentConfigEditorBinding
 import com.zexfer.lufram.gui.dialogs.SelectIntervalDialog
 
-class ConfigFragment : Fragment(), View.OnClickListener,
+/**
+ * Fragment that allows editing of the periodic/dynamic configuration
+ * settings.
+ */
+class ConfigEditorFragment : Fragment(), View.OnClickListener,
     SelectIntervalDialog.OnIntervalSelectedListener {
 
-    private var entryMode: LinearLayout? = null
-    private var textMode: TextView? = null
-
-    // modePager was supposed to be for displaying different options
-    // for each mode; due to a problem where it still prevents swiping
-    // for the parent ViewPager (MainFragment's tabs) after disabling
-    // user-input, we've invented a solution by manually updating the
-    // view in modeFrame.
-    private var modePager: ViewPager2? = null
-    private var modeFrame: FrameLayout? = null
+    /** Manages the current mode-page */
     private var modeFrameBridge: ConfigAdapterBridge? = null
 
-    private var mode: Int =
-        MODE_PERIODIC
-    private var periodicConfig: LuframRepository.PeriodicConfig? = null
-    private var dynamicConfig: LuframRepository.DynamicConfig? = null
+    /** View-binding for the layout. */
+    private lateinit var viewBinding: FragmentConfigEditorBinding
+
+    /** Currently visible/active mode. */
+    private var mode: Int = MODE_PERIODIC
+    /** Cache for the periodic-config settings */
+    private var periodicConfig: PeriodicConfig? = null
+    /** Cache for the dynamic-config settings. */
+    private var dynamicConfig: DynamicConfig? = null
 
     @SuppressLint("NewApi")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? =
-        inflater.inflate(R.layout.fragment_config, container, false).also {
-            entryMode = it.findViewById<LinearLayout>(R.id.cfg_entry_mode)
-                .also { entry -> entry.setOnClickListener(this) }
-            textMode = it.findViewById(R.id.text_mode)
-            modePager = it.findViewById<ViewPager2>(R.id.mode_pager).apply {
-                isUserInputEnabled = false
-            }
-            modeFrame = it.findViewById(R.id.mode_frame)
+    ): View? {
+        viewBinding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_config_editor,
+            container,
+            false
+        )
 
-            updateConfigCache()
-            //modePager!!.adapter = ConfigAdapter(this, periodicConfig!!, dynamicConfig!!)
-            //modePager!!.currentItem = mode
-            textMode!!.text = MODES[mode]
-            modeFrameBridge =
-                ConfigAdapterBridge(
-                    ConfigAdapter(
-                        this,
-                        periodicConfig!!,
-                        dynamicConfig!!
-                    ),
-                    modeFrame!!
-                )
-            modeFrameBridge!!.setCurrentItem(mode)
-        }
+        viewBinding.cfgEntryMode.setOnClickListener(this)
+
+        buildConfigCache()
+        modeFrameBridge = ConfigAdapterBridge(
+            ConfigAdapter(this, periodicConfig!!, dynamicConfig!!),
+            viewBinding.modeFrame
+        )
+        modeTo(mode)
+
+        return viewBinding.root
+    }
 
     override fun onResume() {
         super.onResume()
-        // updateConfigCache()
-        //(modePager!!.adapter as ConfigAdapter).updateConfigs(periodicConfig!!, dynamicConfig!!)
-        modeFrameBridge!!.configAdapter.updateConfigs(periodicConfig!!, dynamicConfig!!)
+        buildConfigCache()
+        modeFrameBridge!!.configAdapter.bindConfig(periodicConfig!!, dynamicConfig!!)
     }
 
     override fun onPause() {
         super.onPause()
+        commitConfigCache()
+    }
 
-        val configDiff: Boolean
-
-        when (mode) {
-            MODE_PERIODIC -> {
-                configDiff = LuframRepository.commitConfig(periodicConfig!!)
-            }
-            MODE_DYNAMIC -> {
-                configDiff = LuframRepository.commitConfig(dynamicConfig!!)
-            }
-            else ->
-                return
-        }
-
-        if (configDiff) {
-            Snackbar.make(modePager!!, "We've updated your configuration", Snackbar.LENGTH_SHORT)
-                .show()
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewBinding.cfgEntryMode.setOnClickListener(null)
     }
 
     override fun onClick(view: View?) {
@@ -113,7 +95,7 @@ class ConfigFragment : Fragment(), View.OnClickListener,
                         arrayOf("Periodic", "Dynamic"),
                         mode
                     ) { dialogInterface, i ->
-                        toMode(i)
+                        modeTo(i)
                         dialogInterface.dismiss()
                     }
                     .show()
@@ -125,36 +107,75 @@ class ConfigFragment : Fragment(), View.OnClickListener,
         periodicConfig!!.intervalMillis = (1000 * (hr.toLong() * 3600 + min.toLong() * 60))
 
         view!!.findViewById<TextView?>(R.id.text_interval)?.text =
-            LuframRepository.PeriodicConfig.formattedIntervalString(
+            PeriodicConfig.formattedIntervalString(
                 hr,
                 min
             )
     }
 
-    private fun toMode(value: Int) {
+    /**
+     * Internally set the current mode to.
+     *
+     * @param value - MODE_PERIODIC or MODE_DYNAMIC
+     */
+    private fun modeTo(value: Int) {
         mode = value
-        // modePager!!.currentItem = value
         modeFrameBridge!!.setCurrentItem(mode)
-        textMode!!.text = MODES[mode]
+        viewBinding.textMode.text = MODES[mode]
+
+        commitConfigCache()
     }
 
-    private fun updateConfigCache() {
+    /**
+     * Builds a cache of the periodic & dynamic configuration settings
+     * in-memory. If the cache is already allocated, it isn't allocated again;
+     * rather data is copied into it.
+     */
+    private fun buildConfigCache() {
         val prefs = LuframRepository.luframPrefs
         mode = prefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC) - CONFIG_PERIODIC
 
-        periodicConfig = LuframRepository.PeriodicConfig(
-            prefs.getLong(PREF_CONFIG_INTERVAL_MILLIS, 3600000),
-            prefs.getBoolean(PREF_CONFIG_RANDOMIZE_ORDER, false)
-        )
+        val intervalMillis = prefs.getLong(PREF_CONFIG_INTERVAL_MILLIS, 3600_000)
+        val randomizeOrder = prefs.getBoolean(PREF_CONFIG_RANDOMIZE_ORDER, false)
+        if (periodicConfig == null) {
+            periodicConfig = PeriodicConfig(intervalMillis, randomizeOrder)
+        } else {
+            periodicConfig!!.copy(intervalMillis, randomizeOrder)
+        }
 
-        dynamicConfig = LuframRepository.DynamicConfig(
-            prefs.getInt(PREF_CONFIG_DAY_RANGE, 1),
-            prefs.getBoolean(PREF_CONFIG_TIMEZONE_ADJUSTED_ENABLED, false)
-        )
+        val dayRange = prefs.getInt(PREF_CONFIG_DAY_RANGE, 1)
+        val tzAdjusted = prefs.getBoolean(PREF_CONFIG_TIMEZONE_ADJUSTED_ENABLED, false)
+        if (dynamicConfig == null) {
+            dynamicConfig = DynamicConfig(dayRange, tzAdjusted)
+        } else {
+            dynamicConfig!!.copy(dayRange, tzAdjusted)
+        }
     }
 
-    // Manages switching the view in modeFrame, like what a ViewPager2
-    // would've done! Clunky bloat, yet mighty fix!
+    /**
+     * Commits the configuration settings (stores them in shared-prefs).
+     *
+     * @return whether the committed configuration was different than the
+     *  one before.
+     */
+    private fun commitConfigCache(): Boolean {
+        val configDiff: Boolean
+
+        if (mode == MODE_PERIODIC) {
+            configDiff = LuframRepository.commitConfig(periodicConfig!!, true)
+            LuframRepository.commitConfig(dynamicConfig!!, false)
+        } else {
+            LuframRepository.commitConfig(periodicConfig!!, false)
+            configDiff = LuframRepository.commitConfig(dynamicConfig!!, true)
+        }
+
+        return configDiff
+    }
+
+    /**
+     * Manages switching the view in modeFrame, like what a ViewPager2
+     * would've done! Clunky bloat, yet mighty fix!
+     */
     class ConfigAdapterBridge(
         val configAdapter: ConfigAdapter,
         private val frame: FrameLayout
@@ -173,67 +194,57 @@ class ConfigFragment : Fragment(), View.OnClickListener,
         }
     }
 
-    // ConfigAdapter was supposed to be used with a ViewPager2. However, the
-    // ViewPager2 will capture swipes and not let the main fragment's ViewPager
-    // get the swipe (even after disabling isUserInputEnabled). Due to this,
-    // we are using a FrameLayout and setting the view manually.
-    // @See ConfigAdapterBridge
+    /*
+     * ConfigAdapter was supposed to be used with a ViewPager2. However, the
+     * ViewPager2 will capture swipes and not let the main fragment's ViewPager
+     * get the swipe (even after disabling isUserInputEnabled). Due to this,
+     * we are using a FrameLayout and setting the view manually.
+     *
+     * @see ConfigEditorFragment.ConfigAdapterBridge
+     */
     class ConfigAdapter(
         private val targetFragment: Fragment,
-        private var periodicConfig: LuframRepository.PeriodicConfig,
-        private var dynamicConfig: LuframRepository.DynamicConfig
+        private var periodicConfig: PeriodicConfig,
+        private var dynamicConfig: DynamicConfig
     ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            when (position) {
-                POSITION_PERIODIC -> {
-                    (holder as PeriodicConfigViewHolder).bindTo(periodicConfig)
-                }
-                POSITION_DYNAMIC -> {
-                    (holder as DynamicConfigViewHolder).bindTo(dynamicConfig)
-                }
+            if (position == POSITION_PERIODIC) {
+                (holder as PeriodicConfigViewHolder).bindTo(periodicConfig)
+            } else {
+                (holder as DynamicConfigViewHolder).bindTo(dynamicConfig)
             }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            val layoutRes: Int = when (viewType) {
-                POSITION_PERIODIC -> R.layout.layout_config_periodic
-                POSITION_DYNAMIC -> R.layout.layout_config_dynamic
-                else -> throw IllegalStateException("ConfigAdapter cannot get invalid position!")
+            val layoutRes: Int = if (viewType == POSITION_PERIODIC) {
+                R.layout.layout_config_periodic
+            } else {
+                R.layout.layout_config_dynamic
             }
 
             val rootView = targetFragment
                 .layoutInflater
                 .inflate(layoutRes, parent, false)
-
-            return when (viewType) {
-                POSITION_PERIODIC -> PeriodicConfigViewHolder(
-                    targetFragment,
-                    rootView
-                )
-                else -> DynamicConfigViewHolder(
-                    rootView
-                ) // must be exhaustive
+            return if (viewType == POSITION_PERIODIC) {
+                PeriodicConfigViewHolder(targetFragment, rootView)
+            } else {
+                DynamicConfigViewHolder(rootView)
             }
         }
 
-        override fun getItemCount(): Int =
-            CONFIG_COUNT
+        override fun getItemCount(): Int = CONFIG_COUNT
 
         override fun getItemViewType(position: Int): Int = position
 
-        fun updateConfigs(
-            periodicConfig: LuframRepository.PeriodicConfig,
-            dynamicConfig: LuframRepository.DynamicConfig
-        ) {
-            this.periodicConfig = periodicConfig
-            this.dynamicConfig = dynamicConfig
+        fun bindConfig(periodic: PeriodicConfig, dynamic: DynamicConfig) {
+            this.periodicConfig = periodic
+            this.dynamicConfig = dynamic
         }
 
         companion object {
             const val POSITION_PERIODIC = 0
             const val POSITION_DYNAMIC = 1
-
             const val CONFIG_COUNT = 2
         }
     }
@@ -250,9 +261,9 @@ class ConfigFragment : Fragment(), View.OnClickListener,
 
         private val textInterval: TextView = rootView.findViewById(R.id.text_interval)
         private val switchRandomize: Switch = rootView.findViewById(R.id.switch_randomize)
-        private var configSource: LuframRepository.PeriodicConfig? = null
+        private var configSource: PeriodicConfig? = null
 
-        fun bindTo(config: LuframRepository.PeriodicConfig) {
+        fun bindTo(config: PeriodicConfig) {
             this.configSource = config
             textInterval.text = config.formattedIntervalString()
             switchRandomize.isChecked = config.randomizeOrder
@@ -281,11 +292,13 @@ class ConfigFragment : Fragment(), View.OnClickListener,
                     configSource!!.randomizeOrder = switchRandomize.isChecked
                 }
             }
+
+            LuframRepository.commitConfig(configSource!!)
         }
     }
 
     class DynamicConfigViewHolder(rootView: View) : RecyclerView.ViewHolder(rootView) {
-        fun bindTo(config: LuframRepository.DynamicConfig) {
+        fun bindTo(config: DynamicConfig) {
             // Do nothing! DynamicConfig has no implemented fields!
         }
     }

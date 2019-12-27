@@ -17,9 +17,7 @@
                 android:name=".WallpaperUpdateReceiver"
                 android:enabled="true"
                 android:exported="true"></receiver>
-        <activity
-                android:name=".MainActivity"
-                android:windowSoftInputMode="adjustNothing">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

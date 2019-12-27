@@ -63,6 +63,8 @@ class MainActivity : AppCompatActivity(),
                                 PorterDuffColorFilter(0x88ffffff.toInt(), PorterDuff.Mode.SRC_OVER)
                         })
 
+                blurredWp.recycle()
+
                 dlRoot!!.background = BitmapDrawable(resources, finalWp)
             })
     }

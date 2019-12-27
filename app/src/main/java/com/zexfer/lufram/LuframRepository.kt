@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.lifecycle.LifecycleObserver
 import com.zexfer.lufram.Lufram.Companion.LUFRAM_PREFS
 import com.zexfer.lufram.Lufram.Companion.PREF_CONFIG_INTERVAL_MILLIS
@@ -61,22 +60,27 @@ object LuframRepository : LifecycleObserver {
         PutWallpaperTask().execute(wallpaper)
     }
 
-    fun commitConfig(config: PeriodicConfig): Boolean {
-        Log.d("Lufram", config.randomizeOrder.toString())
-        val isModeDiff = luframPrefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC) != CONFIG_PERIODIC
-        val isIntervalDiff =
-            luframPrefs.getLong(PREF_CONFIG_INTERVAL_MILLIS, 3600000) != config.intervalMillis
-        val wasIntervalChanged = (config.intervalMillis != luframPrefs.getLong(
-            PREF_CONFIG_INTERVAL_MILLIS, 60000
-        ))
+    /**
+     * Commit a periodic configuration.
+     *
+     * @param config - the settings to save
+     * @param modeSwitch - whether to activate these settings if not in periodic
+     *      mode already.
+     */
+    fun commitConfig(config: PeriodicConfig, modeSwitch: Boolean = true): Boolean {
+        val isModeDiff = configMode != CONFIG_PERIODIC
+        val isIntervalDiff = updateIntervalMillis != config.intervalMillis
 
         luframPrefs.edit().apply {
-            putInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC)
+            if (modeSwitch && isModeDiff) {
+                putInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC)
+            }
+
             putLong(PREF_CONFIG_INTERVAL_MILLIS, config.intervalMillis)
             putBoolean(PREF_CONFIG_RANDOMIZE_ORDER, config.randomizeOrder)
         }.apply()
 
-        if (isModeDiff || wasIntervalChanged) {
+        if ((!isModeDiff && isIntervalDiff) || (modeSwitch && isModeDiff)) {
             restartWallpaper() // changing randomize order doesn't need a restart!
             return true
         }
@@ -84,14 +88,23 @@ object LuframRepository : LifecycleObserver {
         return isIntervalDiff
     }
 
-    fun commitConfig(config: DynamicConfig): Boolean {
-        val isModeDiff = luframPrefs.getInt(PREF_CONFIG_TYPE, CONFIG_PERIODIC) != CONFIG_DYNAMIC
+    /**
+     * Commit a dynamic configuration.
+     *
+     * @param config - settings to save
+     * @param modeSwitch - whether to activate these settings if not already in
+     *      dynamic mode.
+     */
+    fun commitConfig(config: DynamicConfig, modeSwitch: Boolean = true): Boolean {
+        val isModeDiff = configMode != CONFIG_DYNAMIC
 
-        luframPrefs.edit().apply {
-            putInt(PREF_CONFIG_TYPE, CONFIG_DYNAMIC)
-        }.apply()
+        if (modeSwitch) {
+            luframPrefs.edit().apply {
+                putInt(PREF_CONFIG_TYPE, CONFIG_DYNAMIC)
+            }.apply()
+        }
 
-        if (isModeDiff) {
+        if (isModeDiff && modeSwitch) {
             restartWallpaper()
             return true
         }

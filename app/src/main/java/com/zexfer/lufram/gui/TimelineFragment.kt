@@ -73,7 +73,7 @@ class TimelineFragment : Fragment(), View.OnClickListener,
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewBinding = DataBindingUtil.inflate<FragmentTimelineBinding>(
+        viewBinding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_timeline,
             container,

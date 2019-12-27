@@ -11,7 +11,7 @@ import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
-import com.zexfer.lufram.gui.ConfigFragment
+import com.zexfer.lufram.gui.ConfigEditorFragment
 import com.zexfer.lufram.gui.ShowcaseFragment
 import com.zexfer.lufram.gui.dialogs.TimelineUnavailableDialog
 
@@ -131,7 +131,7 @@ class MainFragment : Fragment(), View.OnClickListener, OnPageChangeListener {
 
         override fun getItem(position: Int): Fragment {
             when (position) {
-                FRAG_CONFIG -> return ConfigFragment()
+                FRAG_CONFIG -> return ConfigEditorFragment()
                 FRAG_LIBRARY -> return ShowcaseFragment()
                 else -> throw IllegalArgumentException("position is invalid!")
             }

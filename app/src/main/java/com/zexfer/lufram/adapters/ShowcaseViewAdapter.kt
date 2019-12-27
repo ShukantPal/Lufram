@@ -5,16 +5,12 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.recyclerview.widget.*
 import com.zexfer.lufram.Lufram
 import com.zexfer.lufram.LuframRepository
 import com.zexfer.lufram.R
@@ -22,19 +18,16 @@ import com.zexfer.lufram.WallpaperUpdateController
 import com.zexfer.lufram.database.models.WallpaperCollection
 import com.zexfer.lufram.databinding.LayoutWallpaperPreviewCardBinding
 import com.zexfer.lufram.expanders.Expander
-import com.zexfer.lufram.gui.ShowcaseFragment
 import java.util.*
 
-class WCListAdapter(private val inflater: LayoutInflater) :
-    ListAdapter<WallpaperCollection, ViewHolder>(
-        ShowcaseFragment.DIFF_CALLBACK
-    ) {
+class ShowcaseViewAdapter(private val inflater: LayoutInflater) :
+    ListAdapter<WallpaperCollection, ViewHolder>(DIFF_CALLBACK) {
 
     private var rvs: MutableList<RecyclerView> = mutableListOf()
 
     private var attachCount = 0
     private var animateTimer: Timer? = null
-    private val animateTask = SwitchPreviewImageTask()
+    private var animateTask = SwitchPreviewImageTask()
 
     private val animateStartupListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -80,11 +73,7 @@ class WCListAdapter(private val inflater: LayoutInflater) :
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         ++attachCount
-
-        if (animateTimer === null) {
-            animateTimer = Timer()
-            animateTimer!!.scheduleAtFixedRate(animateTask, 1500, 2500)
-        }
+        enableShowcaseAnimation()
 
         rvs.add(recyclerView)
         recyclerView.addOnScrollListener(animateStartupListener)
@@ -94,7 +83,6 @@ class WCListAdapter(private val inflater: LayoutInflater) :
         parent: ViewGroup,
         viewType: Int
     ): ViewHolder {
-        Log.d("Lufram", "chance")
         return ViewHolder(
             DataBindingUtil.inflate(
                 inflater,
@@ -126,12 +114,45 @@ class WCListAdapter(private val inflater: LayoutInflater) :
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         rvs.remove(recyclerView)
         recyclerView.removeOnScrollListener(animateStartupListener)
-        --attachCount
 
+        --attachCount
         if (attachCount == 0) {
-            animateTask.clear()
-            animateTimer?.cancel()
-            animateTimer = null
+            disableShowcaseAnimation()
+        }
+    }
+
+    fun enableShowcaseAnimation() {
+        if (this.animateTimer != null) {// already enabled
+            return
+        }
+
+        animateTimer = Timer()
+        animateTask = animateTask.resetClone()
+        animateTimer!!.scheduleAtFixedRate(animateTask, 1500, 2500)
+    }
+
+    fun disableShowcaseAnimation() {
+        animateTimer!!.cancel()
+        animateTimer = null
+    }
+
+    companion object {
+        @JvmStatic
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<WallpaperCollection>() {
+            override fun areItemsTheSame(
+                oldItem: WallpaperCollection,
+                newItem: WallpaperCollection
+            ): Boolean {
+                return oldItem.rowId == newItem.rowId
+            }
+
+            override fun areContentsTheSame(
+                oldItem: WallpaperCollection,
+                newItem: WallpaperCollection
+            ): Boolean {
+                return oldItem.label == newItem.label &&
+                        oldItem.sources.equals(newItem.sources)
+            }
         }
     }
 }
@@ -265,9 +286,15 @@ class ViewHolder(private val viewBinding: LayoutWallpaperPreviewCardBinding) :
     }
 }
 
-class SwitchPreviewImageTask : TimerTask() {
-
+/**
+ * Task that is used to switch card preview wallpapers.
+ *
+ * Usage note: This cannot be reused once cancelled - use {@code resetClone}
+ * to get a copy.
+ */
+class SwitchPreviewImageTask(
     private val targetCards: MutableList<ViewHolder> = mutableListOf()
+) : TimerTask() {
 
     fun bind(cardHolder: ViewHolder) {
         if (!targetCards.contains(cardHolder))
@@ -286,4 +313,6 @@ class SwitchPreviewImageTask : TimerTask() {
     fun clear() {
         targetCards.clear()
     }
+
+    fun resetClone() = SwitchPreviewImageTask(targetCards)
 }

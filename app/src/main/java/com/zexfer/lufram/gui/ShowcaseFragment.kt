@@ -8,14 +8,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL
 import com.zexfer.lufram.Lufram
 import com.zexfer.lufram.R
-import com.zexfer.lufram.adapters.WCListAdapter
+import com.zexfer.lufram.adapters.ShowcaseViewAdapter
 import com.zexfer.lufram.database.LuframDatabase
 import com.zexfer.lufram.database.models.WallpaperCollection
 import java.util.*
@@ -37,7 +36,7 @@ class ShowcaseFragment : Fragment() {
 
     private var rvRoot: RecyclerView? = null
     private var frameNothingHere: View? = null
-    private var wcListAdapter: WCListAdapter? = null
+    private var showcaseViewAdapter: ShowcaseViewAdapter? = null
 
     private var showcaseProvider: ShowcaseProvider? = null
 
@@ -59,10 +58,9 @@ class ShowcaseFragment : Fragment() {
         inflater.inflate(R.layout.fragment_wc_preview, container, false).also {
             rvRoot = it.findViewById(R.id.rv_root)
             frameNothingHere = it.findViewById(R.id.frame_none)
-            wcListAdapter =
-                WCListAdapter(inflater)
+            showcaseViewAdapter = ShowcaseViewAdapter(inflater)
 
-            rvRoot!!.adapter = wcListAdapter
+            rvRoot!!.adapter = showcaseViewAdapter
             rvRoot!!.isVerticalScrollBarEnabled = false
             if (Lufram.instance.defaultPrefs.getString("preview_layout", "Grid") == "List") {
                 rvRoot!!.setPadding(0, 0, 0, 240)
@@ -85,7 +83,7 @@ class ShowcaseFragment : Fragment() {
                     frameNothingHere!!.visibility = View.GONE
                 }
 
-                wcListAdapter!!.submitList(ArrayList(it))
+                showcaseViewAdapter!!.submitList(ArrayList(it))
             }
 
             if (showcaseProvider == null) {
@@ -101,11 +99,21 @@ class ShowcaseFragment : Fragment() {
             }
         }
 
+    override fun onResume() {
+        super.onResume()
+        showcaseViewAdapter?.enableShowcaseAnimation()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        showcaseViewAdapter?.disableShowcaseAnimation()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         rvRoot = null
         frameNothingHere = null
-        wcListAdapter = null
+        showcaseViewAdapter = null
     }
 
     override fun onDetach() {
@@ -127,25 +135,5 @@ class ShowcaseFragment : Fragment() {
          * objects at different times.
          */
         fun onShowcaseRequired(): LiveData<List<WallpaperCollection>>
-    }
-
-    companion object {
-        @JvmStatic
-        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<WallpaperCollection>() {
-            override fun areItemsTheSame(
-                oldItem: WallpaperCollection,
-                newItem: WallpaperCollection
-            ): Boolean {
-                return oldItem.rowId == newItem.rowId
-            }
-
-            override fun areContentsTheSame(
-                oldItem: WallpaperCollection,
-                newItem: WallpaperCollection
-            ): Boolean {
-                return oldItem.label == newItem.label &&
-                        oldItem.sources.equals(newItem.sources)
-            }
-        }
     }
 }
